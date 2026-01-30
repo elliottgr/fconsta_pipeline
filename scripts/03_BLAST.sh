@@ -25,13 +25,13 @@ show_help() {
 # Default values
 EVALUE=1e-5
 OUTFMT=6
-QUERY_LIST=""
+QUERY_LIST="db/query_list.tsv"
 BLAST_DB=""
 BLAST_DB_REF=""
 BLAST_DB_TYPE=""
 BLAST_DB_TITLE=""
 BLAST_SEARCH=""
-QCOV_HSP_PERC=""
+QCOV_HSP_PERC="90"
 NUM_THREADS=1
 OUTPUT_FILE="blast_results.tsv"  # Default output file
 
@@ -88,6 +88,8 @@ QUERY_FILES=()
 while IFS=$'\t' read -r FILE_PATH; do
     [[ -n "$FILE_PATH" ]] && QUERY_FILES+=("$FILE_PATH")  # Skip empty lines
 done < "$QUERY_LIST"
+
+echo $QUERY_FILES
 
 # Clear (or create) the output file
 > "$OUTPUT_FILE"

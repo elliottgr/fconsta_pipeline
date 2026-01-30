@@ -75,8 +75,8 @@ python scripts/02_download_UNIPROT_genes.py \
 
 ```
 
-> **Database:** The sample dataset was curated from literature-mined genes (e.g., `sccC`), the `comABCDEFX` operon, and manual curation - see `https://unils-my.sharepoint.com/:x:/g/personal/florentin_constancias_unil_ch/ERcNJYUyCwhDsN0oRiaHzWAB9Y45Zx_NKS0r1Zr7ilXP1w?e=NMbqha` sheet `relevant_genes_2`.
-> 
+> **Database:** The sample dataset was curated by Florentin from literature-mined genes (e.g., `sccC`), the `comABCDEFX` operon, and manual curation.
+
 > **Final Reference Path:** `db/blp_and_others_bacteriocin_and_comABCDEFX_gene_collection.faa`
 
 ---
@@ -93,13 +93,14 @@ bash scripts/03_BLAST.sh \
     --blast_db blast/blp_and_others_and_comABCDEFX \
     --blast_db_reference_sequences db/blp_and_others_bacteriocin_and_comABCDEFX_gene_collection.faa \
     --blast_db_type prot \
-    --blast_db_title 'blp_and_others_bacteriocin_gene_collection' \
-    --query_list input_genomic_full.fna \
-    --blast_search blastx \
+    --blast_db_title 'db/blp_and_others_bacteriocin_gene_collection' \
+    --query_list db/query_list.tsv \
+    --blast_search blastn \
     --evalue 1e-3 \
     --outfmt "6 qseqid sseqid pident length qlen mismatch gapopen gaps nident qstart qend sstart send evalue qcovs qcovhsp bitscore" \
     --num_threads 6 \
-    --output_file 2026/croutcher_gene_aminoacid_blp_and_others_bacteriocin_input_genomic_fullfna_evalu10e3_hsp0.tsv
+    --qcov_hsp_perc 90 \
+    --output_file blast_outputs.tsv
 
 ```
 
