@@ -18,6 +18,9 @@ Script 2 has the following python requirements:
 * [Requests](https://requests.readthedocs.io/en/latest/user/install/#install)
 * [urllib3](https://pypi.org/project/urllib3/)
 
+Script 4 requires gawk:
+* [gawk](https://www.gnu.org/software/gawk/)
+
 ## Repository Structure
 
 ```text
@@ -93,9 +96,9 @@ bash scripts/03_BLAST.sh \
     --blast_db blast/blp_and_others_and_comABCDEFX \
     --blast_db_reference_sequences db/blp_and_others_bacteriocin_and_comABCDEFX_gene_collection.faa \
     --blast_db_type prot \
-    --blast_db_title 'db/blp_and_others_bacteriocin_gene_collection' \
+    --blast_db_title 'blp_and_others_bacteriocin_gene_collection' \
     --query_list db/query_list.tsv \
-    --blast_search blastn \
+    --blast_search blastp \
     --evalue 1e-3 \
     --outfmt "6 qseqid sseqid pident length qlen mismatch gapopen gaps nident qstart qend sstart send evalue qcovs qcovhsp bitscore" \
     --num_threads 6 \
@@ -108,10 +111,10 @@ bash scripts/03_BLAST.sh \
 
 ```bash
 bash scripts/04_filter_BLAST_results.sh \
-    -i 2026/croutcher_gene_aminoacid_blp_and_others_bacteriocin_input_genomic_fullfna_evalu10e3_hsp0.tsv \
+    -i blast_outputs.tsv \
     -p 50 \
     -c 50 \
-    -o 2026/croutcher_gene_aminoacid_blp_and_others_bacteriocin_input_genomic_fullfna_evalu10e3_hsp0_filtered.tsv
+    -o clean_blast_outputs.tsv
 
 ```
 
