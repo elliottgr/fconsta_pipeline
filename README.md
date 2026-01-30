@@ -98,11 +98,9 @@ python scripts/02_download_UNIPROT_genes.py \
 
 ```bash
 
-downloaded_data/UNIPROT_gene_data/protein_sequences/protein_sequences.fasta.gz \
-
 bash scripts/03_BLAST.sh \
     --blast_db downloaded_data/blast/blp_and_others_and_comABCDEFX \
-    --blast_db_reference_sequences db/blp_and_others_bacteriocin_and_comABCDEFX_gene_collection.faa \
+    --blast_db_reference_sequences downloaded_data/UNIPROT_gene_data/protein_sequences/protein_sequences.fasta \
     --blast_db_type prot \
     --blast_db_title 'blp_and_others_bacteriocin_gene_collection' \
     --query_list db/query_list.tsv \
@@ -129,76 +127,40 @@ bash scripts/04_filter_BLAST_results.sh \
 
 ### Step 3B (Alternative): Filter & Rank (R)
 
-Using `scripts/04_filter_blast_results.R`.
-
+Using `scripts/04_filter_blast_results.R` to return a presence / absence table of all the BLAST results
 
 ```r
-process_blast_hits <- function(
-    input, 
-    min_pident = 70, 
-    min_qcovs = 50,
-    colnames_vect = c("qseqid", "sseqid", "pident", "length", "qlen", "mismatch", "gapopen", "gaps",
-                      "nident", "qstart", "qend", "sstart", "send", "evalue", "qcovs", "qcovhsp", "bitscore"),
-    annotation_file = NULL
-) {
-  library(dplyr)
-  library(readr)
-  library(stringr)
-
-  # Load and calculate coverage/clean names
-  df_filtered <- read_tsv(input, col_names = colnames_vect, show_col_types = FALSE) %>%
-    mutate(
-      cov = (nident / length) * 100,
-      qid = str_extract(qseqid, "^[^|]+"),
-      gene_original = str_extract(sseqid, "(?<=|)[^|]+(?=|)") %>% str_remove_all("[^[:alnum:]]+"),
-      gene_lower = tolower(gene_original)
-    ) %>%
-    filter(pident >= min_pident, cov >= min_qcovs)
-
-  # Rank and Rename using explicit dplyr:: calls to prevent masking errors
-  df_ranked <- df_filtered %>%
-    group_by(qid, gene_lower) %>%
-    slice_max(bitscore, n = 1, with_ties = FALSE) %>%
-    ungroup() %>%
-    arrange(desc(bitscore)) %>%
-    mutate(rank = row_number()) %>%
-    dplyr::select(rank, qid, gene_original, gene_lower, bitscore, pident, qcovs, length, evalue) %>%
-    dplyr::rename(GCA_ID = qid, Gene_Name = gene_original)
-
-  return(df_ranked)
-}
-
-# Execution
-results <- process_blast_hits(input = "blast_outputs.tsv")
-
+Rscript scripts/04_filter_blast_results.R --input outputs/blast_outputs.tsv 
 ```
 
----
 
-## 4. Method B: Bakta Annotation (Alternative)
-
-**Rationale:** Standardized annotation prioritizing the custom bacteriocin database.
-**Important:** First step of Bakta annotation pipeline includes ORF calling -> small ORF (e.g., `cibC` will be missed using this appraoch).
-
-### Format Protein Database
-
-```bash
-bash -l scripts/format_faa_for_prokka.sh \
-    --bakta \
-    --input db/blp_and_others_bacteriocin_and_comABCDEFX_gene_collection.faa
-
-```
-
-### Run Bakta
-
-```bash
-bakta GCA_001082985_WGS/data/GCA_001082985.2_6999_1_19_genomic.fna \
-    --db /Volumes/Elements/DB/bakta/db \
-    --threads 10 \
-    --gram + \
-    --keep-contig-headers \
-    --output bakta_output \
-    --proteins db/blp_and_others_bacteriocin_and_comABCDEFX_gene_collection_prokka_ready.faa.gz \
-    --skip-trna --skip-tmrna --skip-rrna --skip-ncrna --skip-crispr --skip-plot
-
-```
+[comment]: #---
+[comment]: #
+[comment]: ### 4. Method B: Bakta Annotation (Alternative)
+[comment]: #
+[comment]: #**Rationale:** Standardized annotation prioritizing the custom [comment]: #bacteriocin database.
+[comment]: #**Important:** First step of Bakta annotation pipeline includes ORF [comment]: #calling -> small ORF (e.g., `cibC` will be missed using this [comment]: #appraoch).
+[comment]: #
+[comment]: #### Format Protein Database
+[comment]: #
+[comment]: #```bash
+[comment]: #bash -l scripts/format_faa_for_prokka.sh \
+[comment]: #    --bakta \
+[comment]: #    --input db/[comment]: #blp_and_others_bacteriocin_and_comABCDEFX_gene_collection.faa
+[comment]: #
+[comment]: #```
+[comment]: #
+[comment]: #### Run Bakta
+[comment]: #
+[comment]: #```bash
+[comment]: #bakta GCA_001082985_WGS/data/GCA_001082985.2_6999_1_19_genomic.fna \
+[comment]: #    --db /Volumes/Elements/DB/bakta/db \
+[comment]: #    --threads 10 \
+[comment]: #    --gram + \
+[comment]: #    --keep-contig-headers \
+[comment]: #    --output bakta_output \
+[comment]: #    --proteins db/[comment]: #blp_and_others_bacteriocin_and_comABCDEFX_gene_collection_prokka_[comment]: #ready.faa.gz \
+[comment]: #    --skip-trna --skip-tmrna --skip-rrna --skip-ncrna --skip-crispr [comment]: #--skip-plot
+[comment]: #
+[comment]: #```
+[comment]: #

@@ -160,9 +160,9 @@ gff <- results$df_filtered %>%
   # keep only the nine GFF columns, in order
   select(seqid, source, type, start, end, score, strand, phase, attributes)
 
-write_lines("##gff-version 3", "blast_hits.gff3")
+write_lines("##gff-version 3", "outputs/blast_hits.gff3")
 write.table(gff,
-            file   = "~/blast_hits.gff3",
+            file   = "outputs/blast_hits.gff3",
             quote  = FALSE,
             sep    = "\t",
             row.names = FALSE,
