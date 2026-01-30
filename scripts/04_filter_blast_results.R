@@ -13,7 +13,8 @@
 #' @export
 
 process_blast_hits <- function(
-    input = "/Users/fconsta3/Documents/Sonja/Projects/Spneumo/all_scripts/croutcher_gene_aminoacid_blp_and_others_bacteriocin_input_genomic_fullfna_evalu10e3_hsp0.tsv",
+    # input = "/Users/fconsta3/Documents/Sonja/Projects/Spneumo/all_scripts/croutcher_gene_aminoacid_blp_and_others_bacteriocin_input_genomic_fullfna_evalu10e3_hsp0.tsv",
+    input = "blast_outputs.tsv",
     output = NULL,
     pa_output = NULL,
     pa_annot_output = NULL,
@@ -21,7 +22,7 @@ process_blast_hits <- function(
     min_qcovs = 50,
     colnames = c("qseqid", "sseqid", "pident", "length", "qlen", "mismatch", "gapopen", "gaps",
                  "nident", "qstart", "qend", "sstart", "send", "evalue", "qcovs", "qcovhsp", "bitscore"),
-    annotation_file = "/Users/fconsta3/Documents/Sonja/Projects/Spneumo/all_scripts/misc/bacteriocin_gene_cluster_mapping.xlsx"
+    annotation_file = NULL
 ) {
   
   if (is.null(output)) output <- sub("\\.tsv$", "_ranked.tsv", input)
@@ -136,7 +137,7 @@ process_blast_hits <- function(
   ))
 }
 
-process_blast_hits(input = "/Users/fconsta3/Documents/Sonja/Projects/Spneumo/all_scripts/2026/croutcher_gene_aminoacid_blp_and_others_bacteriocin_input_genomic_fullfna_evalu10e3_hsp0.tsv",
+process_blast_hits(input = "blast_outputs.tsv",
                    min_pident = 70, min_qcovs = 50) -> results
 
 gff <- results$df_filtered %>%
@@ -171,140 +172,6 @@ write.table(gff,
 
 results$df_filtered %>% 
   write_tsv("~/testdf_filtered.tsv")
-# -----
-# process_blast_hits <- function(
-#     input = "/Users/fconsta3/Documents/Sonja/Projects/Spneumo/all_scripts/croutcher_gene_aminoacid_blp_and_others_bacteriocin_input_genomic_fullfna_evalu10e3_hsp0.tsv",
-#     output = NULL,
-#     pa_output = NULL,
-#     pa_annot_output = NULL,
-#     min_pident = 70,
-#     min_qcovs = 50,
-#     colnames = c("qseqid", "sseqid", "pident", "length", "qlen", "mismatch", "gapopen", "gaps",
-#                  "nident", "qstart", "qend", "sstart", "send", "evalue", "qcovs", "qcovhsp", "bitscore"),
-#     annotation_file = "/Users/fconsta3/Documents/Sonja/Projects/Spneumo/all_scripts/misc/bacteriocin_gene_cluster_mapping.xlsx"
-# ) {
-#   
-#   # Set output filenames based on input file name if not explicitly given
-#   if (is.null(output)) output <- sub("\\.tsv$", "_ranked.tsv", input)
-#   if (is.null(pa_output)) pa_output <- sub("\\.tsv$", "_PA.tsv", input)
-#   if (is.null(pa_annot_output)) pa_annot_output <- sub("\\.tsv$", "_PA_annot.tsv", input)
-#   
-#   # Load required libraries
-#   library(dplyr)
-#   library(readr)
-#   library(tidyr)
-#   library(stringr)
-#   library(readxl)
-#   library(tibble)
-#   
-#   # STEP 1: Read and preprocess BLAST hits
-#   df <- read_tsv(input, show_col_types = TRUE)
-#   
-#   
-#   colnames(df) <- colnames
-#   
-#   df_filtered <-   
-#     df %>% 
-#     mutate(
-#       cov = (nident / length) * 100,  # Calculate query coverage based on aligned identity
-#       qid = str_extract(qseqid, "^[^|]+"),  # Extract unique query ID (e.g., genome or sample)
-#       gene_original = str_extract(sseqid, "^[^|]+") %>% 
-#         str_remove_all("[^[:alnum:]]+"),  # Clean subject gene name
-#       gene_lower = tolower(gene_original)  # Standardize for joining with annotations
-#     ) %>%
-#     filter(pident >= min_pident, cov >= min_qcovs)  # Apply identity and coverage thresholds
-#   
-#   # STEP 2: Rank best BLAST hits per query-gene pair
-#   df_ranked <- df_filtered %>%
-#     group_by(qid, gene_lower) %>%
-#     slice_max(bitscore, n = 1, with_ties = FALSE) %>%  # Pick highest bitscore per query-gene
-#     ungroup() %>%
-#     arrange(desc(bitscore)) %>%
-#     mutate(rank = row_number()) %>%
-#     select(rank, qid, gene_original, gene_lower, bitscore, pident, qcovs, length, evalue) %>%
-#     rename(GCA_ID = qid, Gene_Name = gene_original)
-#   
-#   # STEP 3: Load and join gene annotation (if provided)
-#   if (!is.null(annotation_file)) {
-#     annotation <- read_xlsx(annotation_file, sheet = 1) %>%
-#       select(Gene, Bacteriocin, `Predicted functionality`) %>%
-#       mutate(Gene_lower = tolower(Gene)) %>%
-#       distinct()
-#     
-#     # Join with ranked BLAST results
-#     df_ranked <- df_ranked %>%
-#       left_join(annotation, by = c("gene_lower" = "Gene_lower")) %>%
-#       relocate(Bacteriocin, `Predicted functionality`, .after = Gene_Name) %>%
-#       mutate(
-#         Bacteriocin = replace_na(Bacteriocin, "Not_provided"),
-#         `Predicted functionality` = replace_na(`Predicted functionality`, "Not_provided")
-#       ) %>%
-#       select(-gene_lower)
-#   }
-#   
-#   # Write ranked output to file
-#   write_tsv(df_ranked, output)
-#   
-#   # STEP 4: Create presence/absence matrix
-#   df_pa_raw <- df_filtered %>%
-#     distinct(qid, gene_original) %>%
-#     mutate(present = 1) %>%
-#     pivot_wider(names_from = gene_original, values_from = present, values_fill = 0) %>%
-#     rename(GCA_ID = qid)
-#   
-#   # Save unannotated PA matrix
-#   write_tsv(df_pa_raw, pa_output)
-#   
-#   df_pa <- df_pa_raw
-#   
-#   # STEP 5: Add annotations to PA matrix (if annotation file given)
-#   if (!is.null(annotation_file)) {
-#     annotation_unique <- annotation %>%
-#       distinct(Gene, .keep_all = TRUE)
-#     
-#     gene_order <- annotation_unique$Gene %>% unique()
-#     
-#     # Add missing genes from annotation to PA matrix with NA values
-#     missing_genes <- setdiff(gene_order, colnames(df_pa))
-#     df_pa[missing_genes] <- NA
-#     
-#     # Reorder PA matrix columns with genes from annotation first
-#     present_genes <- colnames(df_pa)[-1]
-#     extras <- setdiff(present_genes, gene_order)
-#     final_order <- c(gene_order, extras)
-#     df_pa <- df_pa %>%
-#       select(GCA_ID, all_of(final_order))
-#     
-#     # Build annotation rows (to be inserted above samples)
-#     all_genes <- colnames(df_pa)[-1]
-#     annotation_rows <- tibble(Gene = all_genes) %>%
-#       left_join(annotation_unique, by = c("Gene" = "Gene")) %>%
-#       mutate(
-#         Bacteriocin = replace_na(Bacteriocin, "Not_provided"),
-#         `Predicted functionality` = replace_na(`Predicted functionality`, "Not_provided")
-#       )
-#     
-#     row_bacteriocin <- c("Bacteriocin", annotation_rows$Bacteriocin)
-#     row_functionality <- c("Functionality", annotation_rows$`Predicted functionality`)
-#     
-#     # Bind annotations as header rows
-#     df_pa <- bind_rows(
-#       as_tibble_row(setNames(row_bacteriocin, colnames(df_pa))),
-#       as_tibble_row(setNames(row_functionality, colnames(df_pa))),
-#       df_pa %>% mutate(across(-GCA_ID, as.character))  # ensure consistency of types
-#     )
-#   }
-#   
-#   # Save annotated PA matrix
-#   readr::write_excel_csv(df_pa, pa_annot_output)
-#   
-#   # Return result dataframes for downstream use
-#   return(list(
-#     df_ranked = df_ranked,
-#     df_pa_raw = df_pa_raw,
-#     df_pa = df_pa
-#   ))
-# }
 
 process_blast_hits() -> results
 

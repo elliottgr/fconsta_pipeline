@@ -18,7 +18,7 @@ Script 2 has the following python requirements:
 * [Requests](https://requests.readthedocs.io/en/latest/user/install/#install)
 * [urllib3](https://pypi.org/project/urllib3/)
 
-Script 4 requires gawk:
+Script 4 (Option A) requires gawk:
 * [gawk](https://www.gnu.org/software/gawk/)
 
 ## Repository Structure
@@ -160,7 +160,7 @@ process_blast_hits <- function(
 }
 
 # Execution
-results <- process_blast_hits(input = "2026/croutcher_gene_aminoacid_blp_and_others_bacteriocin_input_genomic_fullfna_evalu10e3_hsp0.tsv")
+results <- process_blast_hits(input = "blast_outputs.tsv")
 
 ```
 
