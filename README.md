@@ -55,15 +55,18 @@ bash -l scripts/01_download_NCBI_genomes.sh \
 
 ## 2. Reference Protein Preparation
 
+
 **Important:** Database is already in blp_and_others_bacteriocin_and_comABCDEFX_gene_collection.faa.
 
-*Goal:* Create a database of bacteriocin genes (UniProt + Manual Additions).
+**Goal:** Create a database of bacteriocin genes (UniProt + Manual Additions). 
+
+**Instructions:** This step needs a list of tab-seprated gene names to pull reference sequences from UniProt. An example of this is provided in dv/gene_names.tsv
 
 ### UniProt Download
 
 ```bash
 python scripts/02_download_UNIPROT_genes.py \
-    --input gene_names.tsv \
+    --input db/gene_names.tsv \
     --output UNIPROT_genes_names_1313 \
     --taxonomy_id 1313 \
     --min_length 10 \
@@ -72,7 +75,7 @@ python scripts/02_download_UNIPROT_genes.py \
 
 ```
 
-> **Database:** The dataset was supplemented with literature-mined genes (e.g., `sccC`), the `comABCDEFX` operon, and manual curation - see `https://unils-my.sharepoint.com/:x:/g/personal/florentin_constancias_unil_ch/ERcNJYUyCwhDsN0oRiaHzWAB9Y45Zx_NKS0r1Zr7ilXP1w?e=NMbqha` sheet `relevant_genes_2`.
+> **Database:** The sample dataset was curated from literature-mined genes (e.g., `sccC`), the `comABCDEFX` operon, and manual curation - see `https://unils-my.sharepoint.com/:x:/g/personal/florentin_constancias_unil_ch/ERcNJYUyCwhDsN0oRiaHzWAB9Y45Zx_NKS0r1Zr7ilXP1w?e=NMbqha` sheet `relevant_genes_2`.
 > 
 > **Final Reference Path:** `db/blp_and_others_bacteriocin_and_comABCDEFX_gene_collection.faa`
 
