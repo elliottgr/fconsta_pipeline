@@ -75,7 +75,6 @@ python scripts/02_download_UNIPROT_genes.py \
 ### Step A: Run BLASTX
 
 ```bash
-conda activate anvio-8 
 
 bash scripts/03_BLAST.sh \
     --blast_db blast/blp_and_others_and_comABCDEFX \

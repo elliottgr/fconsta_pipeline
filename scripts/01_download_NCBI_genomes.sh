@@ -59,8 +59,23 @@ eval "$(conda shell.bash hook)"
 if ! conda activate ncbi_datasets; then
     echo "Error: Failed to activate 'ncbi_datasets' conda environment."
     echo "Ensure the environment exists and try: conda install -c conda-forge ncbi-datasets-cli"
-    exit 1
+    echo
+    echo "Alternatively, you can install the datasets and dataformats programs manually at:"
+    echo "https://www.ncbi.nlm.nih.gov/datasets/docs/v2/command-line-tools/download-and-install/"
+    echo
+    read -p "Continue without conda environment? [y]es or [n]o" -n -r REPLY
+    echo
+    if [[ $REPLY =~ [Nn]$ ]]
+        then
+            exit 1
+        else
+            condamode=1
+    fi
 fi
+
+# if [ -z "$condaless"]
+# conda deactivate
+# fi
 
 # Create output directories
 mkdir -p "$OUTPUT_DIR" || exit 1
@@ -88,7 +103,9 @@ if ! datasets download genome accession "$NCBI_ACCESSION" \
     echo "1. Internet connection"
     echo "2. NCBI API status (https://www.ncbi.nlm.nih.gov)"
     echo "3. Valid accession number"
-    conda deactivate
+    # if [ -z "$condaless"]
+    #     conda deactivate
+    # fi
     exit 1
 fi
 
@@ -155,5 +172,5 @@ if $CLEAN; then
     rm -rf "$ZIP_FILE" "$EXTRACT_DIR" && echo "Cleaned intermediate files"
 fi
 
-conda deactivate
+#conda deactivate
 echo "Success! Output files in: $FINAL_DATA_DIR"
