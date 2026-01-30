@@ -133,34 +133,34 @@ Using `scripts/04_filter_blast_results.R` to return a presence / absence table o
 Rscript scripts/04_filter_blast_results.R --input outputs/blast_outputs.tsv 
 ```
 
+<!--
+---
 
-[comment]: #---
-[comment]: #
-[comment]: ### 4. Method B: Bakta Annotation (Alternative)
-[comment]: #
-[comment]: #**Rationale:** Standardized annotation prioritizing the custom [comment]: #bacteriocin database.
-[comment]: #**Important:** First step of Bakta annotation pipeline includes ORF [comment]: #calling -> small ORF (e.g., `cibC` will be missed using this [comment]: #appraoch).
-[comment]: #
-[comment]: #### Format Protein Database
-[comment]: #
-[comment]: #```bash
-[comment]: #bash -l scripts/format_faa_for_prokka.sh \
-[comment]: #    --bakta \
-[comment]: #    --input db/[comment]: #blp_and_others_bacteriocin_and_comABCDEFX_gene_collection.faa
-[comment]: #
-[comment]: #```
-[comment]: #
-[comment]: #### Run Bakta
-[comment]: #
-[comment]: #```bash
-[comment]: #bakta GCA_001082985_WGS/data/GCA_001082985.2_6999_1_19_genomic.fna \
-[comment]: #    --db /Volumes/Elements/DB/bakta/db \
-[comment]: #    --threads 10 \
-[comment]: #    --gram + \
-[comment]: #    --keep-contig-headers \
-[comment]: #    --output bakta_output \
-[comment]: #    --proteins db/[comment]: #blp_and_others_bacteriocin_and_comABCDEFX_gene_collection_prokka_[comment]: #ready.faa.gz \
-[comment]: #    --skip-trna --skip-tmrna --skip-rrna --skip-ncrna --skip-crispr [comment]: #--skip-plot
-[comment]: #
-[comment]: #```
-[comment]: #
+## 4. Method B: Bakta Annotation (Alternative)
+
+**Rationale:** Standardized annotation prioritizing the custom bacteriocin database.
+**Important:** First step of Bakta annotation pipeline includes ORF calling -> small ORF (e.g., `cibC` will be missed using this appraoch).
+
+### Format Protein Database
+
+```bash
+bash -l scripts/format_faa_for_prokka.sh \
+    --bakta \
+    --input db/blp_and_others_bacteriocin_and_comABCDEFX_gene_collection.faa
+
+```
+
+### Run Bakta
+
+```bash
+bakta GCA_001082985_WGS/data/GCA_001082985.2_6999_1_19_genomic.fna \
+    --db /Volumes/Elements/DB/bakta/db \
+    --threads 10 \
+    --gram + \
+    --keep-contig-headers \
+    --output bakta_output \
+    --proteins db/blp_and_others_bacteriocin_and_comABCDEFX_gene_collection_prokka_ready.faa.gz \
+    --skip-trna --skip-tmrna --skip-rrna --skip-ncrna --skip-crispr --skip-plot
+
+```
+-->
