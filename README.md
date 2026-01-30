@@ -12,6 +12,12 @@ https://pmc.ncbi.nlm.nih.gov/articles/PMC4517551/
 
 **Requirements**: This pipeline depends on the [NCBI command line tools](https://www.ncbi.nlm.nih.gov/datasets/docs/v2/command-line-tools/download-and-install/).
 
+Script 2 has the following python requirements:
+* [Biopython](https://biopython.org/wiki/Download)
+* [Numpy](https://numpy.org/install/)
+* [Requests](https://requests.readthedocs.io/en/latest/user/install/#install)
+* [urllib3](https://pypi.org/project/urllib3/)
+
 ## Repository Structure
 
 ```text
