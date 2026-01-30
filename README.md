@@ -10,7 +10,9 @@ https://pmc.ncbi.nlm.nih.gov/articles/PMC4517551/
 
 ## Installation
 
-**Requirements**: This pipeline depends on the [NCBI command line tools](https://www.ncbi.nlm.nih.gov/datasets/docs/v2/command-line-tools/download-and-install/).
+**Requirements**: Scripts here are written in a combination of bash, python3, and R. 
+
+This pipeline depends on the [NCBI command line tools](https://www.ncbi.nlm.nih.gov/datasets/docs/v2/command-line-tools/download-and-install/).
 
 Script 2 has the following python requirements:
 * [Biopython](https://biopython.org/wiki/Download)
@@ -20,6 +22,9 @@ Script 2 has the following python requirements:
 
 Script 4 (Option A) requires gawk:
 * [gawk](https://www.gnu.org/software/gawk/)
+
+Generating a presence absence table with R requires:
+* [tidyverse](https://tidyverse.org/)
 
 ## Repository Structure
 
