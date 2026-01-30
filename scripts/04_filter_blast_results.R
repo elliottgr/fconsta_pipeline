@@ -14,7 +14,7 @@
 
 process_blast_hits <- function(
     # input = "/Users/fconsta3/Documents/Sonja/Projects/Spneumo/all_scripts/croutcher_gene_aminoacid_blp_and_others_bacteriocin_input_genomic_fullfna_evalu10e3_hsp0.tsv",
-    input = "blast_outputs.tsv",
+    input = "outputs/blast_outputs.tsv",
     output = NULL,
     pa_output = NULL,
     pa_annot_output = NULL,
@@ -137,7 +137,7 @@ process_blast_hits <- function(
   ))
 }
 
-process_blast_hits(input = "blast_outputs.tsv",
+process_blast_hits(input = "outputs/blast_outputs.tsv",
                    min_pident = 70, min_qcovs = 50) -> results
 
 gff <- results$df_filtered %>%

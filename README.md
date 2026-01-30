@@ -25,10 +25,12 @@ Script 4 (Option A) requires gawk:
 
 ```text
 .
-├── db/
+├── db/ ## (example data)
 │   ├── bacteriocin_gene_cluster_mapping.xlsx
 │   ├── blp_and_others_bacteriocin_and_comABCDEFX_gene_collection.faa
 │   └── blp_and_others_bacteriocin_and_comABCDEFX_gene_collection_prokka_ready.faa.gz
+│   └── gene_names.tsv ## names of genes to download from UniProt 
+│   └── query_list.tsv ## the fasta files to search the references against
 └── scripts/
     ├── 01_download_NCBI_genomes.sh
     ├── 02_download_UNIPROT_genes.py
@@ -36,23 +38,26 @@ Script 4 (Option A) requires gawk:
     ├── 04_filter_BLAST_results.sh
     ├── 04_filter_blast_results.R
     └── format_faa_for_prokka.sh
-
 ```
 
 ---
 
 ## 1. Genome Data Acquisition
 
-**Goal:** Download WGS WGS data from any NCBI repository.
+**Goal:** Download WGS data from NCBI repository. Default here downloads genomes from [Croucher et al's Massachusetts dataset](https://www.ncbi.nlm.nih.gov/bioproject/PRJEB2632/). Any other NCBI project accession should be usable.
+
 ```bash
+
 bash -l scripts/01_download_NCBI_genomes.sh \
     --NCBI_accession PRJEB2632 \
     --include genome,gff3,gbff,protein \
-    --output 01_PRJEB2632_WGS \
+    --output Croucher_WGS_data \
     --include_file_name_in_header \
     --clean
 
 ```
+
+You can also take this time to automatically generate a query list by running 
 
 ---
 
@@ -63,14 +68,15 @@ bash -l scripts/01_download_NCBI_genomes.sh \
 
 **Goal:** Create a database of bacteriocin genes (UniProt + Manual Additions). 
 
-**Instructions:** This step needs a list of tab-seprated gene names to pull reference sequences from UniProt. An example of this is provided in dv/gene_names.tsv
+**Instructions:** This step needs a list of tab-seprated gene names to pull reference sequences from UniProt. An example of this is provided in db/gene_names.tsv
 
 ### UniProt Download
 
 ```bash
+
 python scripts/02_download_UNIPROT_genes.py \
     --input db/gene_names.tsv \
-    --output UNIPROT_genes_names_1313 \
+    --output downloaded_data/UNIPROT_gene_data \
     --taxonomy_id 1313 \
     --min_length 10 \
     --max_length 10000 \
@@ -88,17 +94,19 @@ python scripts/02_download_UNIPROT_genes.py \
 
 **Rationale:** Detect small or divergent ORFs (like `cibC`) that exist in the genomic DNA but are missed by prediction tools.
 
-### Step A: Run BLASTX
+### Step 3A: Run BLASTX
 
 ```bash
 
+downloaded_data/UNIPROT_gene_data/protein_sequences/protein_sequences.fasta.gz \
+
 bash scripts/03_BLAST.sh \
-    --blast_db blast/blp_and_others_and_comABCDEFX \
+    --blast_db downloaded_data/blast/blp_and_others_and_comABCDEFX \
     --blast_db_reference_sequences db/blp_and_others_bacteriocin_and_comABCDEFX_gene_collection.faa \
     --blast_db_type prot \
     --blast_db_title 'blp_and_others_bacteriocin_gene_collection' \
     --query_list db/query_list.tsv \
-    --blast_search blastp \
+    --blast_search blastx \
     --evalue 1e-3 \
     --outfmt "6 qseqid sseqid pident length qlen mismatch gapopen gaps nident qstart qend sstart send evalue qcovs qcovhsp bitscore" \
     --num_threads 6 \
@@ -107,18 +115,19 @@ bash scripts/03_BLAST.sh \
 
 ```
 
-### Step B: Filter Results (Bash)
+### Step 3B: Filter Results (Bash)
 
 ```bash
+
 bash scripts/04_filter_BLAST_results.sh \
-    -i blast_outputs.tsv \
+    -i outputs/blast_outputs.tsv \
     -p 50 \
     -c 50 \
-    -o clean_blast_outputs.tsv
+    -o outputs/clean_blast_outputs.tsv
 
 ```
 
-### Step B Alternative: Filter & Rank (R)
+### Step 3B (Alternative): Filter & Rank (R)
 
 Using `scripts/04_filter_blast_results.R`.
 

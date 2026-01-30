@@ -15,6 +15,7 @@ show_help() {
     echo "  --outfmt                        Output format for BLAST results (-outfmt flag)."
     echo "  --qcov_hsp_perc                 Query coverage per high-scoring segment percentage (-qcov_hsp_perc flag)."
     echo "  --num_threads                   Number of threads to use for BLAST search (-num_threads flag)."
+    echo "  --output_dir                    (Optional) Directory to save within (default: /outputs/)."
     echo "  --output_file                   (Optional) File to save BLAST results (default: blast_results.tsv)."
     echo
     echo "Example:"
@@ -32,8 +33,12 @@ BLAST_DB_TYPE=""
 BLAST_DB_TITLE=""
 BLAST_SEARCH=""
 QCOV_HSP_PERC="90"
-NUM_THREADS=1
+NUM_THREADS=6
+OUTPUT_DIR="outputs"
 OUTPUT_FILE="blast_results.tsv"  # Default output file
+
+## handling the output directory
+mkdir -p "$OUTPUT_DIR/"
 
 # Parse arguments
 while [[ "$#" -gt 0 ]]; do
@@ -48,6 +53,7 @@ while [[ "$#" -gt 0 ]]; do
         --outfmt) OUTFMT="$2"; shift 2 ;;
         --qcov_hsp_perc) QCOV_HSP_PERC="$2"; shift 2 ;;
         --num_threads) NUM_THREADS="$2"; shift 2 ;;
+        --output_dir) OUTPUT_DIR="$2"; shift 2 ;;
         --output_file) OUTPUT_FILE="$2"; shift 2 ;;
         -h|--help) show_help ;;
         *) echo "Unknown argument: $1"; show_help ;;
@@ -92,11 +98,11 @@ done < "$QUERY_LIST"
 echo $QUERY_FILES
 
 # Clear (or create) the output file
-> "$OUTPUT_FILE"
+> "$OUTPUT_DIR/$OUTPUT_FILE"
 
 # If a custom outfmt is provided (i.e., not just a number), add the header line to the output file.
 if ! [[ "$OUTFMT" =~ ^[0-9]+$ ]]; then
-    echo -e "qseqid\tsseqid\tpident\tlength\tqlen\tmismatch\tgapopen\tgaps\tnident\tqstart\tqend\tsstart\tsend\tevalue\tqcovs\tqcovhsp\tbitscore" >> "$OUTPUT_FILE"
+    echo -e "qseqid\tsseqid\tpident\tlength\tqlen\tmismatch\tgapopen\tgaps\tnident\tqstart\tqend\tsstart\tsend\tevalue\tqcovs\tqcovhsp\tbitscore" >> "$OUTPUT_DIR/$OUTPUT_FILE"
 fi
 
 
@@ -107,9 +113,9 @@ for QUERY in "${QUERY_FILES[@]}"; do
     sed '/^>/ s/ /_/g' "$QUERY" > "$CLEAN_QUERY"
     
     echo "Running $BLAST_SEARCH on cleaned query file..."
-    $BLAST_SEARCH -query "$CLEAN_QUERY" -db "$BLAST_DB" -evalue "$EVALUE" -outfmt "$OUTFMT" -qcov_hsp_perc "$QCOV_HSP_PERC" -num_threads "$NUM_THREADS" >> "$OUTPUT_FILE"
-    
+    $BLAST_SEARCH -query "$CLEAN_QUERY" -db "$BLAST_DB" -evalue "$EVALUE" -outfmt "$OUTFMT" -qcov_hsp_perc "$QCOV_HSP_PERC" -num_threads "$NUM_THREADS" >> "$OUTPUT_DIR/$OUTPUT_FILE"
+
     rm "$CLEAN_QUERY"
 done
 
-echo "All BLAST searches completed. Results saved in $OUTPUT_FILE."
+echo "All BLAST searches completed. Results saved in /$OUTPUT_DIR/$OUTPUT_FILE."

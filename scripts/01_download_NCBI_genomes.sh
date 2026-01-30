@@ -83,7 +83,8 @@ if ! conda activate ncbi_datasets; then
 
 fi
 
-
+# Nesting the output directory
+OUTPUT_DIR="downloaded_data/${OUTPUT_DIR}"
 
 # Create output directories
 mkdir -p "$OUTPUT_DIR" || exit 1
@@ -189,6 +190,9 @@ fi
 
 #conda deactivate
 echo "Success! Output files in: $FINAL_DATA_DIR"
+echo "Saving list of genomes to query to: /db/query_list.txt"
+ls $OUTPUT_DIR/data/*.fna > db/query_list.tsv
+
 if $condamode; then
     conda deactivate
 fi
