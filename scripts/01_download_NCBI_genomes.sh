@@ -56,6 +56,10 @@ fi
 
 # Activate conda environment with error handling
 eval "$(conda shell.bash hook)"
+
+##flag to try and handle running the script without conda
+condamode=true
+
 if ! conda activate ncbi_datasets; then
     echo "Error: Failed to activate 'ncbi_datasets' conda environment."
     echo "Ensure the environment exists and try: conda install -c conda-forge ncbi-datasets-cli"
@@ -63,19 +67,23 @@ if ! conda activate ncbi_datasets; then
     echo "Alternatively, you can install the datasets and dataformats programs manually at:"
     echo "https://www.ncbi.nlm.nih.gov/datasets/docs/v2/command-line-tools/download-and-install/"
     echo
-    read -p "Continue without conda environment? [y]es or [n]o" -n -r REPLY
-    echo
+    read -n 1 -p "Continue without conda environment? [y]es or [n]o" REPLY
     if [[ $REPLY =~ [Nn]$ ]]
         then
             exit 1
         else
-            condamode=1
+            condamode=false
     fi
+
+    if ! $condamode; then
+        echo
+        echo "Alright, you can try it without conda, but we're gonna leave you responsible for your own dependencies!"
+        echo
+    fi
+
 fi
 
-# if [ -z "$condaless"]
-# conda deactivate
-# fi
+
 
 # Create output directories
 mkdir -p "$OUTPUT_DIR" || exit 1
@@ -103,16 +111,18 @@ if ! datasets download genome accession "$NCBI_ACCESSION" \
     echo "1. Internet connection"
     echo "2. NCBI API status (https://www.ncbi.nlm.nih.gov)"
     echo "3. Valid accession number"
-    # if [ -z "$condaless"]
-    #     conda deactivate
-    # fi
+    if $condamode; then
+        conda deactivate
+    fi
     exit 1
 fi
 
 # Validate ZIP file
 if [[ ! -f "$ZIP_FILE" ]]; then
     echo "Error: Download failed - ZIP file not created."
-    conda deactivate
+    if $condamode; then
+        conda deactivate
+    fi
     exit 1
 fi
 
@@ -124,7 +134,9 @@ datasets rehydrate --directory "$EXTRACT_DIR" || { echo "Rehydration failed"; ex
 DATA_SUBDIR="$EXTRACT_DIR/ncbi_dataset/data"
 if [[ ! -d "$DATA_SUBDIR" ]]; then
     echo "Error: Data directory missing in downloaded package"
-    conda deactivate
+    if $condamode; then
+        conda deactivate
+    fi
     exit 1
 fi
 
@@ -157,6 +169,9 @@ safe_base_dir=$(tr -cd '[:alnum:]-_.' <<< "$base_dir" | cut -c 1-50)
                                 "s/^>(.*)/>${safe_base_dir}|\1/; \
                                 s/ /_/g;" "$dest"; then
                                 echo "Error modifying headers in $dest"
+                                if $condamode; then
+                                    conda deactivate
+                                fi
                                 exit 1
                             fi
                             ;;
@@ -174,3 +189,6 @@ fi
 
 #conda deactivate
 echo "Success! Output files in: $FINAL_DATA_DIR"
+if $condamode; then
+    conda deactivate
+fi

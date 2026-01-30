@@ -8,6 +8,10 @@ https://pmc.ncbi.nlm.nih.gov/articles/PMC4517551/
 
 ---
 
+## Installation
+
+**Requirements**: This pipeline depends on the [NCBI command line tools](https://www.ncbi.nlm.nih.gov/datasets/docs/v2/command-line-tools/download-and-install/).
+
 ## Repository Structure
 
 ```text
