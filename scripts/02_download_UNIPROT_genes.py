@@ -188,7 +188,7 @@ def main():
     session.mount('https://', HTTPAdapter(max_retries=retries))
 
     # Read gene names from the input file
-    with open(args.input, "r") as f:
+    with open(args.input, "r", errors = "replace") as f:
         gene_names = [line.strip() for line in f.readlines() if line.strip()]
 
     # Remove duplicates and log the number of unique genes
