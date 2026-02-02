@@ -22,7 +22,7 @@ process_blast_hits <- function(
     min_qcovs = 50,
     colnames = c("qseqid", "sseqid", "pident", "length", "qlen", "mismatch", "gapopen", "gaps",
                  "nident", "qstart", "qend", "sstart", "send", "evalue", "qcovs", "qcovhsp", "bitscore"),
-    annotation_file = "db/bacteriocin_gene_cluster_mapping.xlsx"
+    annotation_file = "db/gene_annotations.xlsx"
 ) {
   
   if (is.null(output)) output <- sub("\\.tsv$", "_ranked.tsv", input)
