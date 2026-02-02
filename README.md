@@ -105,7 +105,7 @@ python scripts/02_download_UNIPROT_genes.py \
 
 bash scripts/03_BLAST.sh \
     --blast_db downloaded_data/blast/blp_and_others_and_comABCDEFX \
-    --blast_db_reference_sequences downloaded_data/UNIPROT_gene_data/protein_sequences/protein_sequences.fasta \
+    --blast_db_reference_sequences ownloaded_data/UNIPROT_gene_data/protein_sequences/protein_sequences.fasta \
     --blast_db_type prot \
     --blast_db_title 'blp_and_others_bacteriocin_gene_collection' \
     --query_list db/query_list.tsv \
@@ -135,7 +135,7 @@ bash scripts/04_filter_BLAST_results.sh \
 Using `scripts/04_filter_blast_results.R` to return a presence / absence table of all the BLAST results
 
 ```r
-Rscript scripts/04_filter_blast_results.R --input outputs/blast_outputs.tsv 
+Rscript scripts/04_filter_blast_results.R --input outputs/blast_outputs.tsv --anotation_file db/bacteriocin_gene_cluster_mapping.xlsx
 ```
 
 <!--
