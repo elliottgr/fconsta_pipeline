@@ -33,7 +33,6 @@ Generating a presence absence table with R requires:
 ├── db/ ## (example data)
 │   ├── bacteriocin_gene_cluster_mapping.xlsx
 │   ├── blp_and_others_bacteriocin_and_comABCDEFX_gene_collection.faa
-│   └── blp_and_others_bacteriocin_and_comABCDEFX_gene_collection_prokka_ready.faa.gz
 │   └── gene_names.tsv ## names of genes to download from UniProt 
 │   └── query_list.tsv ## the fasta files to search the references against
 └── scripts/
@@ -42,7 +41,6 @@ Generating a presence absence table with R requires:
     ├── 03_BLAST.sh
     ├── 04_filter_BLAST_results.sh
     ├── 04_filter_blast_results.R
-    └── format_faa_for_prokka.sh
 ```
 
 ---
