@@ -13,17 +13,25 @@ https://pmc.ncbi.nlm.nih.gov/articles/PMC4517551/
 
 ```text
 .
-├── db/
-│   ├── bacteriocin_gene_cluster_mapping.xlsx
-│   ├── blp_and_others_bacteriocin_and_comABCDEFX_gene_collection.faa
-│   └── blp_and_others_bacteriocin_and_comABCDEFX_gene_collection_prokka_ready.faa.gz
-└── scripts/
+├── 01_PRJEB2632_WGS
+│   └── data
+│       ├── GCA_001082985.2_6999_1_19_genomic.fna
+│       ├── GCA_001083045.2_7622_3_64_genomic.fna
+│       └── GCA_001083265.2_7553_4_47_genomic.fna
+├── README.md
+├── blast_out.tsv
+├── db
+│   ├── bacteriocin_gene_cluster_mapping.xlsx
+│   └── blp_and_others_bacteriocin_and_comABCDEFX_gene_collection.faa
+├── genomic_fna.tsv
+└── scripts
     ├── 01_download_NCBI_genomes.sh
     ├── 02_download_UNIPROT_genes.py
     ├── 03_BLAST.sh
     ├── 04_filter_BLAST_results.sh
     ├── 04_filter_blast_results.R
     └── format_faa_for_prokka.sh
+
 
 ```
 
