@@ -1,0 +1,22 @@
+{
+  "version": "1.2",
+  "dbname": "blp_and_others_and_comABCDEFX",
+  "dbtype": "Protein",
+  "db-version": 5,
+  "description": "blp_and_others_bacteriocin_gene_collection",
+  "number-of-letters": 172801,
+  "number-of-sequences": 597,
+  "last-updated": "2026-02-03T11:59:00",
+  "number-of-volumes": 1,
+  "bytes-total": 297445,
+  "bytes-to-cache": 178319,
+  "files": [
+    "blp_and_others_and_comABCDEFX.pdb",
+    "blp_and_others_and_comABCDEFX.phr",
+    "blp_and_others_and_comABCDEFX.pin",
+    "blp_and_others_and_comABCDEFX.pot",
+    "blp_and_others_and_comABCDEFX.psq",
+    "blp_and_others_and_comABCDEFX.ptf",
+    "blp_and_others_and_comABCDEFX.pto"
+  ]
+}

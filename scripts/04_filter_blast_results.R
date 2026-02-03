@@ -13,7 +13,7 @@
 #' @export
 
 process_blast_hits <- function(
-    input = "/Users/fconsta3/Documents/Sonja/Projects/Spneumo/all_scripts/croutcher_gene_aminoacid_blp_and_others_bacteriocin_input_genomic_fullfna_evalu10e3_hsp0.tsv",
+    input = NULL,
     output = NULL,
     pa_output = NULL,
     pa_annot_output = NULL,
@@ -21,7 +21,7 @@ process_blast_hits <- function(
     min_qcovs = 50,
     colnames = c("qseqid", "sseqid", "pident", "length", "qlen", "mismatch", "gapopen", "gaps",
                  "nident", "qstart", "qend", "sstart", "send", "evalue", "qcovs", "qcovhsp", "bitscore"),
-    annotation_file = "/Users/fconsta3/Documents/Sonja/Projects/Spneumo/all_scripts/misc/bacteriocin_gene_cluster_mapping.xlsx"
+    annotation_file = NULL
 ) {
   
   if (is.null(output)) output <- sub("\\.tsv$", "_ranked.tsv", input)
@@ -71,7 +71,7 @@ process_blast_hits <- function(
       dplyr::select(-gene_lower)
   }
   
-  write_tsv(df_ranked, output)
+  # write_tsv(df_ranked, output)
   
   # STEP 4: Create PA matrix using lowercase genes for consistency
   df_pa_raw <- df_filtered %>%
@@ -80,7 +80,7 @@ process_blast_hits <- function(
     pivot_wider(names_from = gene_lower, values_from = present, values_fill = 0) %>%
     dplyr::rename(GCA_ID = qid)
   
-  write_tsv(df_pa_raw, pa_output)
+  # write_tsv(df_pa_raw, pa_output)
   
   df_pa <- df_pa_raw
   
@@ -126,7 +126,7 @@ process_blast_hits <- function(
     )
   }
   
-  readr::write_excel_csv(df_pa, pa_annot_output)
+  # readr::write_excel_csv(df_pa, pa_annot_output)
   
   return(list(
     df_ranked = df_ranked,
@@ -136,41 +136,42 @@ process_blast_hits <- function(
   ))
 }
 
-process_blast_hits(input = "/Users/fconsta3/Documents/Sonja/Projects/Spneumo/all_scripts/2026/croutcher_gene_aminoacid_blp_and_others_bacteriocin_input_genomic_fullfna_evalu10e3_hsp0.tsv",
-                   min_pident = 70, min_qcovs = 50) -> results
-
-gff <- results$df_filtered %>%
-  mutate(
-    seqid  = sseqid,              # or qseqid if you want hits on query
-    source = "BLAST",
-    type   = "match",
-    start  = pmin(sstart, send),
-    end    = pmax(sstart, send),
-    score  = sprintf("%.2f", pident),      # keep 2‑dec pident
-    strand = ifelse(send >= sstart, "+", "-"),
-    phase  = ".",
-    # build a minimal attributes string
-    attributes = paste0("ID=", row_number(),
-                        ";Name=", sub("\\|.*", "", sseqid),  # gene part
-                        ";Target=", qseqid,
-                        " ", qstart, " ", qend,
-                        ";evalue=", evalue)
-  ) %>%
-  # keep only the nine GFF columns, in order
-  select(seqid, source, type, start, end, score, strand, phase, attributes)
-
-write_lines("##gff-version 3", "blast_hits.gff3")
-write.table(gff,
-            file   = "~/blast_hits.gff3",
-            quote  = FALSE,
-            sep    = "\t",
-            row.names = FALSE,
-            col.names = FALSE,
-            append = TRUE)
-
-
-results$df_filtered %>% 
-  write_tsv("~/testdf_filtered.tsv")
+# process_blast_hits(input = "blast_out.tsv",
+#                    min_pident = 70, min_qcovs = 50,
+#                    annotation_file = NULL) -> results
+# 
+# gff <- results$df_filtered %>%
+#   mutate(
+#     seqid  = sseqid,              # or qseqid if you want hits on query
+#     source = "BLAST",
+#     type   = "match",
+#     start  = pmin(sstart, send),
+#     end    = pmax(sstart, send),
+#     score  = sprintf("%.2f", pident),      # keep 2‑dec pident
+#     strand = ifelse(send >= sstart, "+", "-"),
+#     phase  = ".",
+#     # build a minimal attributes string
+#     attributes = paste0("ID=", row_number(),
+#                         ";Name=", sub("\\|.*", "", sseqid),  # gene part
+#                         ";Target=", qseqid,
+#                         " ", qstart, " ", qend,
+#                         ";evalue=", evalue)
+#   ) %>%
+#   # keep only the nine GFF columns, in order
+#   select(seqid, source, type, start, end, score, strand, phase, attributes)
+# 
+# write_lines("##gff-version 3", "blast_hits.gff3")
+# write.table(gff,
+#             file   = "~/blast_hits.gff3",
+#             quote  = FALSE,
+#             sep    = "\t",
+#             row.names = FALSE,
+#             col.names = FALSE,
+#             append = TRUE)
+# 
+# 
+# results$df_filtered %>% 
+#   write_tsv("~/testdf_filtered.tsv")
 # -----
 # process_blast_hits <- function(
 #     input = "/Users/fconsta3/Documents/Sonja/Projects/Spneumo/all_scripts/croutcher_gene_aminoacid_blp_and_others_bacteriocin_input_genomic_fullfna_evalu10e3_hsp0.tsv",
@@ -306,7 +307,3 @@ results$df_filtered %>%
 #   ))
 # }
 
-process_blast_hits() -> results
-
-
-results$df_pa
