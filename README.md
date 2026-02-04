@@ -135,3 +135,14 @@ Using `scripts/04_filter_blast_results.R` to return a presence / absence table o
 ```r
 Rscript scripts/05_make_PA_table.R BacteriocinLoci
 ```
+
+### Step 5: Attach Strain and Isolate labels to PA data
+
+Data generated during the pipeline is not stored with metadata. For later analysis, we need to reattach the strain and taxon IDs to the relevant gene presence absence profile. Contigs are searched using BioPython and then the relevant entry is downloaded and parsed. Realistically, this should only work with data uploaded and formatted like the Croucher dataset. This is NOT a generalizable solution to this problem. 
+
+You can use it via 
+
+```python
+python3 scripts/05_format_PA_table.py
+```
+
