@@ -107,11 +107,9 @@ gunzip downloaded_data/UNIPROT_gene_data/protein_sequences/protein_sequences.fas
 downloaded_data/UNIPROT_gene_data/protein_sequences/protein_sequences.fasta
 
 
-## 3. Method A: BLAST Analysis (Genomic vs Protein)
+## 3. BLAST Analysis (Genomic vs Protein)
 
-**Rationale:** Detect small or divergent ORFs (like `cibC`) that exist in the genomic DNA but are missed by prediction tools.
-
-### Step 3A: Run BLASTX
+**Rationale:** Detect small or divergent ORFs (like `cibC`) that exist in the genomic DNA but are missed by prediction tools. Output is an unprocessed list of BLAST hits.
 
 ```bash
 
@@ -130,22 +128,10 @@ bash scripts/03_BLAST.sh \
 
 ```
 
-### Step 3B: Filter Results (Bash)
+### Step 4: Filter & Rank (R)
 
-```bash
-
-bash scripts/04_filter_BLAST_results.sh \
-    -i outputs/blast_outputs.tsv \
-    -p 50 \
-    -c 50 \
-    -o outputs/clean_blast_outputs.tsv
-
-```
-
-### Step 3B (Alternative): Filter & Rank (R)
-
-Using `scripts/04_filter_blast_results.R` to return a presence / absence table of all the BLAST results
+Using `scripts/04_filter_blast_results.R` to return a presence / absence table of all the BLAST results. Invoking using `scripts/05_make_PA_table.R`. It takes a command line argument to name the output file.
 
 ```r
-Rscript scripts/04_filter_blast_results.R --input outputs/blast_outputs.tsv --anotation_file db/bacteriocin_gene_cluster_mapping.xlsx
+Rscript scripts/05_make_PA_table.R BacteriocinLoci
 ```
