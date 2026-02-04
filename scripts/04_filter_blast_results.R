@@ -11,7 +11,7 @@
 #' @return A list with two data frames: df_ranked and df_pa df_pa_raw
 #'
 #' @export
-
+ 
 process_blast_hits <- function(
     input = NULL,
     output = NULL,
