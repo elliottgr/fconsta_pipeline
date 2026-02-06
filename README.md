@@ -145,4 +145,3 @@ You can use it via
 ```python
 python3 scripts/05_format_PA_table.py
 ```
-
