@@ -106,6 +106,9 @@ gunzip downloaded_data/UNIPROT_gene_data/protein_sequences/protein_sequences.fas
 > **Final Reference Path:** 
 downloaded_data/UNIPROT_gene_data/protein_sequences/protein_sequences.fasta
 
+## Step 2.5
+
+The above step depends on UniProt to generate BLAST references. Some genes of interest for our specific study are only hosted as putative sequences on the NCBI database. You can generate the necessary sequences using the script in the ```/extra/``` folder
 
 ## 3. BLAST Analysis (Genomic vs Protein)
 
@@ -143,5 +146,5 @@ Data generated during the pipeline is not stored with metadata. For later analys
 You can use it via 
 
 ```python
-python3 scripts/05_format_PA_table.py
+python3 scripts/06_format_PA_table.py
 ```

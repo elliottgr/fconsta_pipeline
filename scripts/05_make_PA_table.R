@@ -8,5 +8,5 @@ if (length(args)==0){
 
 
 source("scripts/04_filter_blast_results.R")
-results<-process_blast_hits(input="outputs/blast_out.tsv", min_pident = 70, min_qcovs = 50, annotation_file = NULL)
+results<-process_blast_hits(input="outputs/blast_outputs.tsv", min_pident = 70, min_qcovs = 50, annotation_file = NULL)
 write.csv(results$df_pa, filename)
