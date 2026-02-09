@@ -120,13 +120,13 @@ bash scripts/03_BLAST.sh \
     --blast_db downloaded_data/blast/bacteriocin_BLAST \
     --blast_db_reference_sequences downloaded_data/UNIPROT_gene_data/protein_sequences/protein_sequences.fasta \
     --blast_db_type prot \
-    --blast_db_title 'bacteriocin_BLAST' \
+    --blast_db_title 'bacteriocin_BLAST_db' \
     --query_list db/query_list.tsv \
     --blast_search blastx \
     --evalue 1e-3 \
     --outfmt "6 qseqid sseqid pident length qlen mismatch gapopen gaps nident qstart qend sstart send evalue qcovs qcovhsp bitscore" \
     --num_threads 6 \
-    --qcov_hsp_perc 90 \
+    --qcov_hsp_perc 0 \
     --output_file blast_outputs.tsv
 
 ```
