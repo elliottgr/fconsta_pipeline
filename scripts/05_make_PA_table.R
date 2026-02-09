@@ -1,3 +1,6 @@
+## Simple script. Takes the BLAST outputs from script 3, invokes 
+## script 4 to make a PA table, then saves everything with a nice filename 
+
 args = commandArgs(trailingOnly=TRUE)
 ## handling missing filename
 if (length(args)==0){
