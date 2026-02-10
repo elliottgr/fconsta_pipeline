@@ -153,19 +153,23 @@ python3 scripts/06_format_PA_table.py path_to/your_pa_table.csv
 
 ### Supplemental stuff
 
-This directory also contains the ability to validate the gene FASTA by BLASTing the gene references against themselves. You can generate this data by running the following command:
+This directory also contains the ability to validate the gene FASTA by BLASTing the gene references against themselves. You can generate this data by running the following commands:
+
+```python
+python extra/GenerateValidationQueryList.py          
+```
 
 ```bash
-bash extra/BLASTGeneDataValidation.sh \ 
+bash scripts/03_BLAST.sh \
     --blast_db extra/downloads/blast/ValidationDB \
     --blast_db_reference_sequences  downloaded_data/UNIPROT_gene_data/protein_sequences/protein_sequences.fasta \
     --blast_db_type prot \
     --blast_db_title 'ValidationDB' \
-    --query_list extra/query_list.tsv \
-    --blast_search blastp \
+    --query_list extra/queries.csv \
+    --blast_search blastp \ 
     --evalue 1e-3 \
     --outfmt "6 qseqid sseqid pident length qlen mismatch gapopen gaps nident qstart qend sstart send evalue qcovs qcovhsp bitscore" \
     --num_threads 6 \
-    --qcov_hsp_perc 50 \
-    --output_file extra/validation_blast_outputs.tsv
+    --qcov_hsp_perc 10 \
+    --output_file validation_blast_outputs.tsv
 ```
