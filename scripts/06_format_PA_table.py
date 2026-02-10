@@ -7,14 +7,22 @@
 
 import pandas as pd
 from Bio import Entrez
-import os
+import os, sys ## for files and args :D
 
 ## Entrez stuff
 Entrez.email = "add_an_email@example.url"
 Entrez.tool = "MightBeNiceToNameThis"
 
 ## loading the table
-df_pa = pd.read_csv("outputs/BacteriocinLoci_pa_table_2026-Feb-04.csv", index_col="Unnamed: 0")
+if len(sys.argv) > 1:
+    pa_table = sys.argv[1]
+
+## cancels the run if you forgot a file 
+else: 
+    print("\n You need to give me a file to process. Please rerun the script with a command line argument like: \n\n python3 scripts/06_format_PA_table.py path_to/your_pa_file.csv \n\n")
+    sys.exit()
+
+df_pa = pd.read_csv(pa_table, index_col="Unnamed: 0")
 
 Isolate_Vec = [] ## what we actually need
 Strain_Vec = [] ## not necessary explicitly, but nice for later data validation
@@ -26,18 +34,21 @@ for i in range(len(df_pa)):
     print("Checking metadata for assembly " + str(test_gca))
     stream = Entrez.esearch(db='assembly', term = test_gca, retmax="40")
     record1 = Entrez.read(stream)
-
-    stream = Entrez.esummary(db='assembly', id = record1['IdList'][0])
-    record2 = Entrez.read(stream)
-    # print(record2["DocumentSummarySet"])
-    Isolate = record2["DocumentSummarySet"]["DocumentSummary"][0]["Biosource"]["Isolate"]
-    Strain = record2["DocumentSummarySet"]["DocumentSummary"][0]["Biosource"]["InfraspeciesList"][1]["Sub_value"]
+    try:
+        stream = Entrez.esummary(db='assembly', id = record1['IdList'][0])
+        record2 = Entrez.read(stream)
+        Isolate = record2["DocumentSummarySet"]["DocumentSummary"][0]["Biosource"]["Isolate"]
+        Strain = record2["DocumentSummarySet"]["DocumentSummary"][0]["Biosource"]["InfraspeciesList"][1]["Sub_value"]
+        
+        if len(Isolate) == 0:
+            Isolate = Strain ## handling unlabeled isolates the way they seem to be handled in other metadata (cf. the reference metadata file in this repo)
+        
+        Isolate_Vec.append(Isolate)
+        Strain_Vec.append(Strain)
+    except IndexError:
+        print("Seems like we didn't find a result for that sequence lookup :(")
+        print(test_gca)
     
-    if len(Isolate) == 0:
-        Isolate = Strain ## handling unlabeled isolates the way they seem to be handled in other metadata (cf. the reference metadata file in this repo)
-    
-    Isolate_Vec.append(Isolate)
-    Strain_Vec.append(Strain)
 
 
 

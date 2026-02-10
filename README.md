@@ -133,7 +133,9 @@ bash scripts/03_BLAST.sh \
 
 ### Step 4: Filter & Rank (R)
 
-Using `scripts/04_filter_blast_results.R` to return a presence / absence table of all the BLAST results. Invoking using `scripts/05_make_PA_table.R`. It takes a command line argument to name the output file.
+Using `scripts/04_filter_blast_results.R` to return a presence / absence table of all the BLAST results. Invoking using `scripts/05_make_PA_table.R`. It takes a command line argument to name the output file. 
+
+**Note:** Genes that fail to generate a single positive BLAST will not be counted in the PA table. In principle, they can be considered as a column of all zeros and as having no state change for ASR.
 
 ```r
 Rscript scripts/05_make_PA_table.R BacteriocinLoci
@@ -146,5 +148,5 @@ Data generated during the pipeline is not stored with metadata. For later analys
 You can use it via 
 
 ```python
-python3 scripts/06_format_PA_table.py
+python3 scripts/06_format_PA_table.py path_to/your_pa_table.csv
 ```
