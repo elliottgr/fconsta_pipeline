@@ -166,7 +166,7 @@ bash scripts/03_BLAST.sh \
     --blast_db_type prot \
     --blast_db_title 'ValidationDB' \
     --query_list extra/queries.csv \
-    --blast_search blastp \ 
+    --blast_search blastp \
     --evalue 1e-3 \
     --outfmt "6 qseqid sseqid pident length qlen mismatch gapopen gaps nident qstart qend sstart send evalue qcovs qcovhsp bitscore" \
     --num_threads 6 \

@@ -18,7 +18,7 @@ with open("downloaded_data/UNIPROT_gene_data/protein_sequences/protein_sequences
             print("Found protein: " + current_protein)
             current_filename = current_protein + "_protein.fasta"
             current_file = open("extra/sequences/" + current_filename, "w")
-            current_file.write(current_protein + "\n")
+            current_file.write(">" + current_protein + "\n")
             query_list.write("extra/sequences/" + current_filename + "\n")
         else:
             current_file.write(line + "\n")
