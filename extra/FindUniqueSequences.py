@@ -3,13 +3,15 @@
 ## ideally, you'll only have 2-3 variants per identified gene
 import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
 
 blast_outputs_file = "outputs/test.tsv"
 df = pd.read_csv(blast_outputs_file, delimiter="\t")
 
 
-df[["GCA_ID", "qseqid"]] = df["qseqid"].str.split("|", expand=True)
-df["gene"] = df["sseqid"].str.split("|", expand=True)[0]
+df[["GCA_ID", "qseqid"]] = df["qseqid"].str.split("|", expand=True) ## WGS sequences
+df[["gene", "sseqid"]] = df["sseqid"].str.split("|", expand=True)[[0,1]] ## reference sequences
+
 # ## filtering data to only retain matching hits above each threshold  
 min_pident = 90
 min_qcov = 85
@@ -21,19 +23,29 @@ gene_seqs = df["sseqid"].unique()
 gene = []
 seq_id = []
 genome = []
-sequence = []
+WGS_sequence = []
 reference_sequence = []
+reference_id = []
 
 for gene_seq in gene_seqs:
     matches = df[df["sseqid"] == gene_seq]
     for index, match in matches.iterrows():
-        gene.append(gene_seq.split("|")[0])
-        seq_id.append(gene_seq.split("|")[-1])
+        gene.append(match.gene)
+        seq_id.append(gene_seq)
         genome.append(match["GCA_ID"])
-        sequence.append(match["sseq"])
-        reference_sequence.append(match["qseq"])
+        WGS_sequence.append(match["qseq"])
+        reference_id.append(match["sseqid"])
+        reference_sequence.append(match["sseq"])
 
-out_df = pd.DataFrame(data={"gene" : gene, "seq_id" : seq_id, "genome" : genome, "sequence" : sequence, "reference_sequence" : reference_sequence})
-print(out_df.head())
-out_df.groupby("gene").sequence.value_counts().unstack().plot.barh()    
+out_df = pd.DataFrame(data={"gene" : gene, "variant" : seq_id, "genome" : genome, "sequences" : WGS_sequence, "reference_sequences" : reference_sequence})
+# out_df = out_df.sample(50000)
+out_df = out_df.groupby("variant", as_index=False).agg({"gene" : "first", "sequences" : "unique", "reference_sequences" : "unique"})
+out_df["sequences"] = out_df["sequences"].apply(lambda x: len(x))
+out_df["reference_sequences"] = out_df["reference_sequences"].apply(lambda x: len(x))
+
+fig, ax = plt.subplots()
+ax.scatter(out_df["sequences"], (out_df["sequences"] - out_df["reference_sequences"]))
+
+ax.set_xlabel("# of observed sequences")
+ax.set_ylabel("# of observed sequences - # of reference sequences")
 plt.show()
