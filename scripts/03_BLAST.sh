@@ -25,7 +25,7 @@ show_help() {
 
 # Default values
 EVALUE=1e-5
-OUTFMT=6
+OUTFMT=8
 QUERY_LIST="db/query_list.tsv"
 BLAST_DB=""
 BLAST_DB_REF=""

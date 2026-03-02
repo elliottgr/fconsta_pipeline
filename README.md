@@ -110,6 +110,14 @@ downloaded_data/UNIPROT_gene_data/protein_sequences/protein_sequences.fasta
 
 The above step depends on UniProt to generate BLAST references. Some genes of interest for our specific study are only hosted as putative sequences on the NCBI database. You can generate the necessary sequences using the script in the ```/extra/``` folder
 
+Additionally, you'll need to generate a query list for the next step. The simplest command to do so is:
+
+```bash
+realpath downloaded_data/Croucher_WGS_data/data/*genomic.fna > db/query_list.tsv
+
+
+```
+
 ## 3. BLAST Analysis (Genomic vs Protein)
 
 **Rationale:** Detect small or divergent ORFs (like `cibC`) that exist in the genomic DNA but are missed by prediction tools. Output is an unprocessed list of BLAST hits.
@@ -124,7 +132,7 @@ bash scripts/03_BLAST.sh \
     --query_list db/query_list.tsv \
     --blast_search blastx \
     --evalue 1e-3 \
-    --outfmt "6 qseqid sseqid pident length qlen mismatch gapopen gaps nident qstart qend sstart send evalue qcovs qcovhsp bitscore" \
+    --outfmt "8 qseqid sseqid pident length qlen mismatch gapopen gaps nident qstart qend sstart send evalue qcovs qcovhsp bitscore qseq sseq" \
     --num_threads 6 \
     --qcov_hsp_perc 0 \
     --output_file blast_outputs.tsv
