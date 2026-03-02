@@ -4,10 +4,16 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+import seaborn as sns
 
 blast_outputs_file = "outputs/test.tsv"
 df = pd.read_csv(blast_outputs_file, delimiter="\t")
 
+## used for color plotting later, splitting into major and minor clusters
+annotations = pd.read_csv("extra/gene_annotations.csv")
+annotations[["cluster", "subcluster"]] = annotations["cluster"].str.split(" ", expand=True)
+
+print(annotations.head())
 
 df[["GCA_ID", "qseqid"]] = df["qseqid"].str.split("|", expand=True) ## WGS sequences
 df[["gene", "sseqid"]] = df["sseqid"].str.split("|", expand=True)[[0,1]] ## reference sequences
@@ -38,14 +44,18 @@ for gene_seq in gene_seqs:
         reference_sequence.append(match["sseq"])
 
 out_df = pd.DataFrame(data={"gene" : gene, "variant" : seq_id, "genome" : genome, "sequences" : WGS_sequence, "reference_sequences" : reference_sequence})
-# out_df = out_df.sample(50000)
+# out_df = out_df.sample(500)
 out_df = out_df.groupby("variant", as_index=False).agg({"gene" : "first", "sequences" : "unique", "reference_sequences" : "unique"})
 out_df["sequences"] = out_df["sequences"].apply(lambda x: len(x))
 out_df["reference_sequences"] = out_df["reference_sequences"].apply(lambda x: len(x))
+out_df["sequence_diff"] = out_df["sequences"] - out_df["reference_sequences"]
 
-fig, ax = plt.subplots()
-ax.scatter(out_df["sequences"], (out_df["sequences"] - out_df["reference_sequences"]))
+## appending annotations / clusters for coloring
+out_df = out_df.join(annotations, lsuffix="gene", rsuffix="annotation_gene")
 
-ax.set_xlabel("# of observed sequences")
-ax.set_ylabel("# of observed sequences - # of reference sequences")
+## variant with only blp data
+blp_df = out_df[out_df["cluster"] == "blp"]
+
+sns.relplot(data=out_df, x = "sequences", y = "sequence_diff", hue="cluster", style = "functions")
+sns.relplot(data=blp_df, x = "sequences", y = "sequence_diff", hue="functions")
 plt.show()
