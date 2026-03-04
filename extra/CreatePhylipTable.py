@@ -6,15 +6,12 @@ import numpy as np
 import pandas as pd
 import os
 
-blast_outputs_file = "outputs/test.tsv"
+blast_outputs_file = "outputs/blast_outputs.tsv"
 directory = "extra/distance_matrices"
 df = pd.read_csv(blast_outputs_file, delimiter="\t")
 
-
-
 if not os.path.exists(directory):
     os.makedirs(directory)
-
 
 annotations = pd.read_csv("extra/gene_annotations.csv")
 annotations[["cluster", "subcluster"]] = annotations["cluster"].str.split(" ", expand=True)
@@ -47,18 +44,14 @@ for gene_seq in gene_seqs:
         reference_sequence.append(match["sseq"])
 
 out_df = pd.DataFrame(data={"gene" : gene, "variant" : seq_id, "genome" : genome, "sequences" : WGS_sequence, "reference_sequences" : reference_sequence})
-# out_df = out_df.sample(50000) 
+# out_df = out_df.sample(5000) 
 
 ## appending annotations / clusters for coloring
 out_df = out_df.set_index("gene").join(annotations.set_index("gene"), lsuffix="_left", rsuffix="")
-# print(out_df.columns)
+
 ## variant with only blp data
-
-
 blp_df = out_df[out_df["cluster"] == "blp"].groupby("gene")
-print(blp_df)
-blp_df_grouped = blp_df
-# print(blp_df_grouped.groups.keys())
+
 ## iterating over the grouped dataframe, only focusing on blp
 ## each sequence will have it's LS distance calc'd then saved to 
 ## doing a lazy df construction
@@ -73,23 +66,34 @@ output_matrix = np.empty((sequences, sequences), float)
 
 
 for name, group in blp_df:
-    print(name, "\n", group)
-    if name == "blpM":
-        file = name + "_distance_matrix.txt"
-        i = 0
-        sequences = len(group["sequences"].unique())
+    print("Now calculating for gene: "+ str(name))
+    file = name + "_distance_matrix.txt"
+    file_no_genomes = name + "_distance_matrix_no_gene_names.txt"
+    genome_dict = {}
+    i = 0
+    sequences = len(group["sequences"].unique())
+    output_matrix = np.empty((sequences, sequences), float)
 
-        output_matrix = np.empty((sequences, sequences), float)
-        for seq_foc in group["sequences"].unique(): ## focal sequence
-            j = 0
-            for seq_tar in group["sequences"].unique(): ## target sequence
-                output_matrix[i, j] = lv.distance(seq_foc, seq_tar)
-                j += 1
-            i += 1
-        with open(directory + "/" + file, "w") as f:
-            f.write('\t' + str(sequences) + "\n")
-            for line in range(sequences):
-                
-                line_to_write = "sequence_" + str(line) + "\t" + "\t".join([str(x) for x in output_matrix[line]]) + "\n"
-                f.write(line_to_write)
-            f.close()
+    for seq_foc in group["sequences"].unique(): ## focal sequence
+        genome_dict[i] = group[group["sequences"] == seq_foc]["genome"]
+        j = 0
+        for seq_tar in group["sequences"].unique(): ## target sequence
+            output_matrix[i, j] = lv.distance(seq_foc, seq_tar)
+            j += 1
+        i += 1
+
+    with open(directory + "/" + file, "w") as f:
+        f.write('\t' + str(sequences) + "\n")
+        for line in range(sequences):
+            line_to_write = "+".join(genome_dict[line].unique()) + "\t" + "\t".join([str(x) for x in output_matrix[line]]) + "\n"
+            f.write(line_to_write)
+        f.close()
+    with open(directory + "/" + file_no_genomes, "w") as f2:
+        f2.write('\t' + str(sequences) + "\n")
+        for line in range(sequences):
+            line_to_write = "sequence_" + str(line) + "\t" + "\t".join([str(x) for x in output_matrix[line]]) + "\n"
+            f2.write(line_to_write)
+        f2.close()
+        
+
+print("Done!!!")

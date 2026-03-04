@@ -42,7 +42,7 @@ for gene_seq in gene_seqs:
         reference_sequence.append(match["sseq"])
 
 out_df = pd.DataFrame(data={"gene" : gene, "variant" : seq_id, "genome" : genome, "sequences" : WGS_sequence, "reference_sequences" : reference_sequence})
-out_df = out_df.sample(5000)
+out_df = out_df.sample(50000)
 out_df = out_df.groupby("variant", as_index=False).agg({"gene" : "first", "sequences" : "unique", "reference_sequences" : "unique"})
 out_df["sequences"] = out_df["sequences"].apply(lambda x: len(x))
 out_df["reference_sequences"] = out_df["reference_sequences"].apply(lambda x: len(x))
