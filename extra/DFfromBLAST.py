@@ -2,7 +2,7 @@
 
 import pandas as pd
 
-def create_df_from_blast(blast_outputs_file, annotations_file="", min_pident=90, min_qcov=85):
+def create_df_from_blast(blast_outputs_file, annotations_file="", min_pident=90, min_qcov=85, verbose = False):
 
     df = pd.read_csv(blast_outputs_file, delimiter="\t")
     if annotations_file != "":
@@ -11,14 +11,16 @@ def create_df_from_blast(blast_outputs_file, annotations_file="", min_pident=90,
     df[["GCA_ID", "qseqid"]] = df["qseqid"].astype(str).str.split("|", expand=True) ## WGS sequences
     df[["gene", "sseqid"]] = df["sseqid"].str.split("|", expand=True)[[0,1]] ## reference sequences
 
-    print("Number of total BLAST hits: " + str(len(df)) + "\n")
-    print("Genes identified before filtering: " + str(len(df["gene"].unique())))
+    if verbose == True:
+        print("Number of total BLAST hits: " + str(len(df)) + "\n")
+        print("Genes identified before filtering: " + str(len(df["gene"].unique())))
 
     df["flo_cov"] = df["nident"] / df["length"] * 100 ## returns the coverage percentage of the portion of the query that was a match, as per Florentin's implementation in file 04
 
     df = df[(df["pident"] >= min_pident) & (df["flo_cov"] >= min_qcov)]
-    print("Number of BLAST hits with % identity >= " + str(min_pident) + " and coverage >= " + str(min_qcov) + " : " + str(len(df)) + "\n")
-    print("Genes identified after filtering: " + str(len(df["gene"].unique())))
+    if verbose == True:
+        print("Number of BLAST hits with % identity >= " + str(min_pident) + " and coverage >= " + str(min_qcov) + " : " + str(len(df)) + "\n")
+        print("Genes identified after filtering: " + str(len(df["gene"].unique())))
     gene_seqs = df["sseqid"].unique()
     gene = []
     seq_id = []

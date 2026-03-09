@@ -13,7 +13,7 @@ annotations_file = "extra/gene_annotations.csv"
 min_pident = 90
 min_qcov = 85
 
-def create_LV_dist_df(blast_outputs_file, annotations_file = "", min_pident = 90, min_qcov=85, create_plots = False):
+def create_LV_dist_df(blast_outputs_file, annotations_file = "", min_pident = 90, min_qcov=85, create_plots = False, plot_target_cluster = False, verbose = False):
     df = create_df_from_blast(blast_outputs_file, annotations_file, min_pident, min_qcov)
 
     ## variant with only blp data
@@ -38,7 +38,8 @@ def create_LV_dist_df(blast_outputs_file, annotations_file = "", min_pident = 90
     for gene, group in blp_df:
         ## per variant
         for variant in group["variant"].unique():
-            print("Now comparing " + str(gene) + " variant ID " + str(variant))
+            if verbose == True:
+                print("Now comparing " + str(gene) + " variant ID " + str(variant))
             within_group = group[group["variant"] == variant]
             out_group = group[group["variant"] != variant]
 
@@ -78,11 +79,8 @@ def create_LV_dist_df(blast_outputs_file, annotations_file = "", min_pident = 90
 
     ## filtering to just BLP
     if create_plots == True:
-        out_df = out_df[out_df["cluster"] == "blp"]
-        
+        out_df = out_df[out_df["cluster"] == plot_target_cluster]
         fig, ax = plt.subplots()
-
-        print(out_df.function)
         sns.scatterplot(data=out_df, x="ingroup_mean_ratio", y="outgroup_mean_ratio", hue="function")#, style = "function")
         ax.set_xlabel("mean ingroup similarity ratio")
         ax.set_ylabel("mean outgroup similarity ratio")
