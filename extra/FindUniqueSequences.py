@@ -5,60 +5,26 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
+from DFfromBLAST import create_df_from_blast
+
+min_pident, min_qcov = (90, 85)
 
 blast_outputs_file = "outputs/blast_outputs.tsv"
-df = pd.read_csv(blast_outputs_file, delimiter="\t")
+annotations_file = "extra/gene_annotations.csv"
+out_df = create_df_from_blast(blast_outputs_file)
 
-## used for color plotting later, splitting into major and minor clusters
-annotations = pd.read_csv("extra/gene_annotations.csv")
+annotations = pd.read_csv(annotations_file)
 annotations[["cluster", "subcluster"]] = annotations["cluster"].str.split(" ", expand=True)
 
-df[["GCA_ID", "qseqid"]] = df["qseqid"].astype(str).str.split("|", expand=True) ## WGS sequences
-df[["gene", "sseqid"]] = df["sseqid"].str.split("|", expand=True)[[0,1]] ## reference sequences
-
-# ## filtering data to only retain matching hits above each threshold  
-min_pident = 90
-min_qcov = 85
-
-print("Number of total BLAST hits: " + str(len(df)) + "\n")
-print("Genes identified before filtering: " + str(len(df["gene"].unique())))
-min_pident = 90
-min_qcov = 85
-
-df["flo_cov"] = df["nident"] / df["length"] * 100 ## returns the coverage percentage of the portion of the query that was a match, as per Florentin's implementation in file 04
-
-df = df[(df["pident"] >= min_pident) & (df["flo_cov"] >= min_qcov)]
-print("Number of BLAST hits with % identity >= " + str(min_pident) + " and coverage >= " + str(min_qcov) + " : " + str(len(df)) + "\n")
-print("Genes identified after filtering: " + str(len(df["gene"].unique())))
-
-
-gene_seqs = df["sseqid"].unique()
-
-gene = []
-seq_id = []
-genome = []
-WGS_sequence = []
-reference_sequence = []
-reference_id = []
-
-for gene_seq in gene_seqs:
-    matches = df[df["sseqid"] == gene_seq]
-    for index, match in matches.iterrows():
-        gene.append(match.gene)
-        seq_id.append(gene_seq)
-        genome.append(match["GCA_ID"])
-        WGS_sequence.append(match["qseq"])
-        reference_id.append(match["sseqid"])
-        reference_sequence.append(match["sseq"])
-
-out_df = pd.DataFrame(data={"gene" : gene, "variant" : seq_id, "genome" : genome, "sequences" : WGS_sequence, "reference_sequences" : reference_sequence})
 out_df = out_df.sample(50000)
+out_df.reindex(range(len(out_df)))
+
 out_df = out_df.groupby("variant", as_index=False).agg({"gene" : "first", "sequences" : "unique", "reference_sequences" : "unique"})
 out_df["sequences"] = out_df["sequences"].apply(lambda x: len(x))
 out_df["reference_sequences"] = out_df["reference_sequences"].apply(lambda x: len(x))
 out_df["sequence_diff"] = out_df["sequences"] - out_df["reference_sequences"]
 
-## appending annotations / clusters for coloring
+# ## appending annotations / clusters for coloring
 out_df = out_df.set_index("gene").join(annotations.set_index("gene"), lsuffix="_left", rsuffix="")
 
 ## variant with only blp data
