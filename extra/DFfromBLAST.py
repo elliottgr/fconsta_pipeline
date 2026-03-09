@@ -13,8 +13,6 @@ def create_df_from_blast(blast_outputs_file, annotations_file="", min_pident=90,
 
     print("Number of total BLAST hits: " + str(len(df)) + "\n")
     print("Genes identified before filtering: " + str(len(df["gene"].unique())))
-    min_pident = 90
-    min_qcov = 85
 
     df["flo_cov"] = df["nident"] / df["length"] * 100 ## returns the coverage percentage of the portion of the query that was a match, as per Florentin's implementation in file 04
 
