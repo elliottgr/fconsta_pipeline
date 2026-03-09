@@ -114,8 +114,6 @@ Additionally, you'll need to generate a query list for the next step. The simple
 
 ```bash
 realpath downloaded_data/Croucher_WGS_data/data/*genomic.fna > db/query_list.tsv
-
-
 ```
 
 ## 3. BLAST Analysis (Genomic vs Protein)

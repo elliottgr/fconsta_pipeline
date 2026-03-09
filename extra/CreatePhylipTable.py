@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 import os
 
-blast_outputs_file = "outputs/test.tsv"
+blast_outputs_file = "outputs/blast_out.tsv"
 directory = "extra/distance_matrices"
 df = pd.read_csv(blast_outputs_file, delimiter="\t")
 
@@ -18,18 +18,21 @@ if not os.path.exists(directory):
 annotations = pd.read_csv("extra/gene_annotations.csv")
 annotations[["cluster", "subcluster"]] = annotations["cluster"].str.split(" ", expand=True)
 
+
 df[["GCA_ID", "qseqid"]] = df["qseqid"].astype(str).str.split("|", expand=True) ## WGS sequences
 df[["gene", "sseqid"]] = df["sseqid"].str.split("|", expand=True)[[0,1]] ## reference sequences
 
+print("Number of total BLAST hits: " + str(len(df)) + "\n")
+print("Genes identified before filtering: " + str(len(df["gene"].unique())))
 min_pident = 90
 min_qcov = 85
 
-print("Number of total BLAST hits: " + str(len(df)) + "\n")
-df = df[(df["pident"] >= min_pident) & (df["qcovs"] >= min_qcov)]
+df["flo_cov"] = df["nident"] / df["length"] * 100 ## returns the coverage percentage of the portion of the query that was a match, as per Florentin's implementation in file 04
+
+df = df[(df["pident"] >= min_pident) & (df["flo_cov"] >= min_qcov)]
 print("Number of BLAST hits with % identity >= " + str(min_pident) + " and coverage >= " + str(min_qcov) + " : " + str(len(df)) + "\n")
-
+print("Genes identified after filtering: " + str(len(df["gene"].unique())))
 gene_seqs = df["sseqid"].unique()
-
 gene = []
 seq_id = []
 genome = []
@@ -49,13 +52,11 @@ for gene_seq in gene_seqs:
 
 out_df = pd.DataFrame(data={"gene" : gene, "variant" : seq_id, "genome" : genome, "sequences" : WGS_sequence, "reference_sequences" : reference_sequence})
 
-print(out_df["gene"].unique())
 ## appending annotations / clusters for coloring
 out_df = out_df.set_index("gene").join(annotations.set_index("gene"), lsuffix="_left", rsuffix="")
 
 ## variant with only blp data
-blp_df = out_df[out_df["cluster"] == "blp"]#.groupby("gene")
-print(blp_df.index.unique())
+blp_df = out_df[out_df["cluster"] == "blp"].groupby("gene")
 
 ## iterating over the grouped dataframe, only focusing on blp
 ## each sequence will have it's LS distance calc'd then saved to 

@@ -20,7 +20,7 @@ process_blast_hits <- function(
     min_pident = 70,
     min_qcovs = 50,
     colnames = c("qseqid", "sseqid", "pident", "length", "qlen", "mismatch", "gapopen", "gaps",
-                 "nident", "qstart", "qend", "sstart", "send", "evalue", "qcovs", "qcovhsp", "bitscore"),
+                 "nident", "qstart", "qend", "sstart", "send", "evalue", "qcovs", "qcovhsp", "bitscore", "qseq", "sseq"),
     annotation_file = NULL
 ) {
   
