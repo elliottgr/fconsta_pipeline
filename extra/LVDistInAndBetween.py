@@ -18,13 +18,13 @@ sys.path.append("/".join(new_path))
 from PythonHelperFuncs import create_LV_dist_df
 
 
-blast_outputs_file = "outputs/test.tsv"
+blast_outputs_file = "outputs/blast_out.tsv"
 annotations_file = "extra/gene_annotations.csv"
 min_pident = 90
 min_qcov = 85
 plot_target_cluster = "blp"
 
-out_df = create_LV_dist_df(blast_outputs_file, annotations_file, min_pident, min_qcov)
+out_df = create_LV_dist_df(blast_outputs_file, annotations_file, min_pident, min_qcov, verbose=True)
 
 if plot_target_cluster != "":
     out_df = out_df[out_df["cluster"] == plot_target_cluster]
@@ -39,3 +39,4 @@ ax.set_xlim(scatter_lim_x)
 ax.set_ylim(scatter_lim_y)
 sns.move_legend(ax, "upper left", bbox_to_anchor=(1,1))
 plt.show()
+plt.savefig("blp_cluster_sequence_comparisons.png")

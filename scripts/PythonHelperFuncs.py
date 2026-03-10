@@ -26,8 +26,11 @@ def create_df_from_blast(blast_outputs_file, annotations_file="", min_pident=90,
     seq_id = []
     genome = []
     WGS_sequence = []
+    contig = []
     reference_sequence = []
     reference_id = []
+    percent_id = []
+    flo_cov = [] ## Florentin's coverage, which is % coverage of the returned query
 
     for gene_seq in gene_seqs:
         matches = df[df["sseqid"] == gene_seq]
@@ -36,10 +39,13 @@ def create_df_from_blast(blast_outputs_file, annotations_file="", min_pident=90,
             seq_id.append(gene_seq)
             genome.append(match["GCA_ID"])
             WGS_sequence.append(match["qseq"])
+            contig.append(match["qseqid"])
             reference_id.append(match["sseqid"])
             reference_sequence.append(match["sseq"])
+            flo_cov.append(match["flo_cov"])
+            percent_id.append(match["pident"])
 
-    out_df = pd.DataFrame(data={"gene" : gene, "variant" : seq_id, "genome" : genome, "sequences" : WGS_sequence, "reference_sequences" : reference_sequence})
+    out_df = pd.DataFrame(data={"gene" : gene, "variant" : seq_id, "flo_cov" : flo_cov, "p_id" : percent_id, "contig" : contig, "genome" : genome, "sequences" : WGS_sequence, "reference_sequences" : reference_sequence})
 
     ## appending annotations / clusters for coloring
     if annotations_file != "":
@@ -47,11 +53,33 @@ def create_df_from_blast(blast_outputs_file, annotations_file="", min_pident=90,
 
     return out_df
 
-def create_LV_dist_df(blast_outputs_file, annotations_file = "", min_pident = 90, min_qcov=85, create_plots = False, plot_target_cluster = "", verbose = False):
-    df = create_df_from_blast(blast_outputs_file, annotations_file, min_pident, min_qcov)
+def create_LV_dist_df(blast_outputs_file, annotations_file = "", min_pident = 90, min_qcov=85, create_plots = False, target_cluster = "blp", verbose = True, generate_new_table=False, filename = "extra/distance_matrices/LV_Dist_DataFrame.csv"):
+    
+    ## the pairwise calculations of distance take a long time. Unless you explicitly request it
+    ## this function will only generate a new table once. Subsequent invocations will try to load
+    ## a temporary file that is saved after the first implementation
 
-    ## variant with only blp data
-    blp_df = df[df["cluster"] == "blp"].groupby("gene")
+
+
+    if generate_new_table == False:
+        try:
+            if verbose == True:
+                print("Trying to load existing LV distance table")
+            df = pd.read_csv(filename)
+            if verbose == True:
+                print("Succesfully loaded LV distance table from " + str(filename))
+            return df
+        except FileNotFoundError:
+            if verbose == True:
+                print("I couldn't find an existing BLAST distance table, so I'll generate you a new one!")
+    else:
+        print("We'll try generating a new table for you! This may take a while!")
+
+    df = create_df_from_blast(blast_outputs_file, annotations_file, min_pident, min_qcov, verbose = verbose)
+
+    ## variant with only cluster's data
+    ## calling it blp_df because that's what I originally wrote this for
+    blp_df = df[df["cluster"] == target_cluster].groupby("gene")
 
     ## creating arrays for a tidy df later
     gene_id = []
@@ -110,4 +138,10 @@ def create_LV_dist_df(blast_outputs_file, annotations_file = "", min_pident = 90
                                 "ingroup_median_ratio":ingroup_medians_ratio, "outgroup_median_ratio":outgroup_medians_ratio,
                                 "ingroup_mean":ingroup_means, "outgroup_mean":outgroup_means, 
                                 "ingroup_median":ingroup_medians, "outgroup_median":outgroup_medians})
+    
+    if verbose == True:
+        print("Succesfully generated the table! That probably took a while! :)")
+        print("Saving table to " + str(filename))
+    out_df.to_csv(filename)
+    
     return out_df
