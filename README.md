@@ -130,7 +130,7 @@ bash scripts/03_BLAST.sh \
     --query_list db/query_list.tsv \
     --blast_search blastx \
     --evalue 1e-3 \
-    --outfmt "8 qseqid sseqid pident length qlen mismatch gapopen gaps nident qstart qend sstart send evalue qcovs qcovhsp bitscore qseq sseq" \
+    --outfmt "6 qseqid sseqid pident length qlen slen mismatch gapopen gaps nident qstart qend sstart send evalue qcovs qcovhsp bitscore stitle qseq sseq" \
     --num_threads 6 \
     --qcov_hsp_perc 0 \
     --output_file blast_outputs.tsv
