@@ -28,16 +28,6 @@ lv_df = create_LV_dist_df(blast_output_file, annotation_file, min_pident, min_qc
 lv_df_kept = lv_df[(lv_df["ingroup_mean_ratio"] > lv_df["outgroup_mean_ratio"]) & (lv_df["outgroup_mean_ratio"] <= outgroup_identity_threshold)]
 kept_variants = lv_df_kept["variant"].unique()
 
-# of the remaining variants, we need to merge variants that have identical reference sequences
-# storing as a dict where keys are the original variant ID and elements are merged IDs
-# merged_variants = {}
-# for variant in kept_variants:
-#     sequence_row = df[df["variant"] == variant]
-#     sequence = sequence_row["reference_sequences"].unique()
-#     if len(sequence) > 1:
-#         print(sequence_row)
-#         print(sequence)
-
 ## need to create a version of df that has only variants kept in the previous step
 ## variants that are filtered need to be collapsed into a single variant 
 
@@ -50,32 +40,6 @@ for contig in df["contig"].unique():
     df_contig = df[df["contig"] == contig]
     reference_fasta_seqs = {}
     for gene in df_contig.index.unique():
-        ## manually loading the reference FASTA so we can double check that sequences are generating good coverage
-        
-        # ## first loop for UniProt files
-        # try: 
-        #     reference_fasta_file = main_FASTA_directory + str(gene) + "_protein.fasta"
-
-        #     with open(reference_fasta_file) as handle:
-        #         for record in SeqIO.parse(handle, "fasta"):
-        #             gene_name, gene_variant = record.name.split("|")
-        #             if gene_name not in reference_fasta_seqs.keys():
-        #                 reference_fasta_seqs[gene_name] = {gene_variant : str(record.seq)}
-        #             elif gene_variant not in reference_fasta_seqs[gene_name].keys():
-        #                     reference_fasta_seqs[gene_name][gene_variant] = str(record.seq)
-        
-        # ## seperate loop for the supplemental / non-UniProt files
-        # except FileNotFoundError:
-        #     supplemental_files = glob.glob(supplemental_FASTA_directory + str(gene) + "_*_protein.fasta")
-        #     for reference_fasta_file in supplemental_files:
-        #         with open(reference_fasta_file) as handle:
-        #             for record in SeqIO.parse(handle, "fasta"):
-        #                 gene_name, gene_variant = record.name.split("_", 1)
-        #                 if gene_name not in reference_fasta_seqs.keys():
-        #                     reference_fasta_seqs[gene_name] = {gene_variant : str(record.seq)}
-        #                 elif gene_variant not in reference_fasta_seqs[gene_name].keys():
-        #                         reference_fasta_seqs[gene_name][gene_variant] = str(record.seq)
-
         candidate_hits = df_contig[df_contig.index == gene]
         filtered_candidates = candidate_hits[candidate_hits["variant"].isin(kept_variants)]
         if len(filtered_candidates) > 0:
