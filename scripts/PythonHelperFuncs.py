@@ -21,7 +21,8 @@ def create_df_from_blast(blast_outputs_file, annotations_file="", min_pident=90,
     df["flo_subject_aligned"] = ((abs(df["send"] - df["sstart"]) + 1 ) / df["slen"]) * 100 ## since the queries / references are backwards, we need to redefine qcov this way (cf. Flo's R file in his repo)
     df["flo_total_sub_covered"] = (df["flo_subject_aligned"] / df["slen"]) * 100
     
-    df = df[(df["pident"] >= min_pident) & (df["flo_total_sub_covered"] >= min_qcov)]
+    df = df[(df["pident"] >= min_pident)]
+    df = df[(df["flo_total_sub_covered"] >= min_qcov)]
     if verbose == True:
         print("Number of BLAST hits with % identity >= " + str(min_pident) + " and coverage >= " + str(min_qcov) + " : " + str(len(df)) + "\n")
         print("Genes identified after filtering: " + str(len(df["gene"].unique())))
