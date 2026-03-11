@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import Levenshtein as lv
 
+
 def create_df_from_blast(blast_outputs_file, annotations_file="", min_pident=90, min_qcov=85, verbose = False):
 
     df = pd.read_csv(blast_outputs_file, delimiter="\t")
@@ -17,7 +18,10 @@ def create_df_from_blast(blast_outputs_file, annotations_file="", min_pident=90,
 
     df["flo_cov"] = df["nident"] / df["length"] * 100 ## returns the coverage percentage of the portion of the query that was a match, as per Florentin's implementation in file 04
 
-    df = df[(df["pident"] >= min_pident) & (df["flo_cov"] >= min_qcov)]
+    df["flo_subject_aligned"] = ((abs(df["send"] - df["sstart"]) + 1 ) / df["slen"]) * 100 ## since the queries / references are backwards, we need to redefine qcov this way (cf. Flo's R file in his repo)
+    df["flo_total_sub_covered"] = (df["flo_subject_aligned"] / df["slen"]) * 100
+    
+    df = df[(df["pident"] >= min_pident) & (df["flo_total_sub_covered"] >= min_qcov)]
     if verbose == True:
         print("Number of BLAST hits with % identity >= " + str(min_pident) + " and coverage >= " + str(min_qcov) + " : " + str(len(df)) + "\n")
         print("Genes identified after filtering: " + str(len(df["gene"].unique())))
@@ -31,6 +35,7 @@ def create_df_from_blast(blast_outputs_file, annotations_file="", min_pident=90,
     reference_id = []
     percent_id = []
     flo_cov = [] ## Florentin's coverage, which is % coverage of the returned query
+    total_sub_covered = []
 
     for gene_seq in gene_seqs:
         matches = df[df["sseqid"] == gene_seq]
@@ -38,14 +43,15 @@ def create_df_from_blast(blast_outputs_file, annotations_file="", min_pident=90,
             gene.append(match.gene)
             seq_id.append(gene_seq)
             genome.append(match["GCA_ID"])
-            WGS_sequence.append(match["qseq"])
+            reference_sequence.append(match["qseq"])
             contig.append(match["qseqid"])
             reference_id.append(match["sseqid"])
-            reference_sequence.append(match["sseq"])
+            WGS_sequence.append(match["sseq"])
             flo_cov.append(match["flo_cov"])
+            total_sub_covered.append(min([match["flo_total_sub_covered"], 100]))
             percent_id.append(match["pident"])
 
-    out_df = pd.DataFrame(data={"gene" : gene, "variant" : seq_id, "flo_cov" : flo_cov, "p_id" : percent_id, "contig" : contig, "genome" : genome, "sequences" : WGS_sequence, "reference_sequences" : reference_sequence})
+    out_df = pd.DataFrame(data={"gene" : gene, "variant" : seq_id, "sub_cov" : total_sub_covered, "flo_cov" : flo_cov, "p_id" : percent_id, "contig" : contig, "genome" : genome, "sequences" : WGS_sequence, "reference_sequences" : reference_sequence})
 
     ## appending annotations / clusters for coloring
     if annotations_file != "":

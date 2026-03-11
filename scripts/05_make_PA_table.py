@@ -4,16 +4,22 @@
 import pandas as pd
 from PythonHelperFuncs import create_df_from_blast
 from PythonHelperFuncs import create_LV_dist_df
+from Bio import SeqIO
+import glob
+
+
 
 ## TO DO: turn these into cmd line args
 blast_output_file = "outputs/test.tsv"
 annotation_file = "extra/gene_annotations.csv"
-min_pident, min_qcov, verbose = (90, 85, True)
+main_FASTA_directory = "downloaded_data/UNIPROT_gene_data/protein_sequences/" ## needed for data validation
+supplemental_FASTA_directory = "extra/sequences/"
+min_pident, min_qcov, verbose = (90, 95, True)
 outgroup_identity_threshold = 99 ## bit of a convuluted stat, but we want to join any category that has too much similarity with the outgroup
 
 ## Importing the BLAST files
 df = create_df_from_blast(blast_output_file, annotation_file, min_pident, min_qcov, verbose)
-lv_df = create_LV_dist_df(blast_output_file, annotation_file, min_pident, min_qcov, target_cluster="blp", create_plots=False, verbose = verbose)
+lv_df = create_LV_dist_df(blast_output_file, annotation_file, min_pident, min_qcov, target_cluster="blp", create_plots=False, verbose = verbose, generate_new_table = False)
 
 ## need to drop any variants conditionally, where the 
 ## similarity between clusters is greater than within
@@ -22,8 +28,8 @@ lv_df = create_LV_dist_df(blast_output_file, annotation_file, min_pident, min_qc
 lv_df_kept = lv_df[(lv_df["ingroup_mean_ratio"] > lv_df["outgroup_mean_ratio"]) & (lv_df["outgroup_mean_ratio"] <= outgroup_identity_threshold)]
 kept_variants = lv_df_kept["variant"].unique()
 
-## of the remaining variants, we need to merge variants that have identical sequences
-## storing as a dict where keys are the original variant ID and elements are merged IDs
+# of the remaining variants, we need to merge variants that have identical reference sequences
+# storing as a dict where keys are the original variant ID and elements are merged IDs
 # merged_variants = {}
 # for variant in kept_variants:
 #     sequence_row = df[df["variant"] == variant]
@@ -37,26 +43,59 @@ kept_variants = lv_df_kept["variant"].unique()
 
 ## doing this by iterating over every contig. if it has multiple variants, we take the
 ## highest scoring that appears in the "kept_variants" list. Otherwise, we bin it 
-
+i = 0
 df = df.sample(1000)
 for contig in df["contig"].unique():
 
     df_contig = df[df["contig"] == contig]
+    reference_fasta_seqs = {}
     for gene in df_contig.index.unique():
+        ## manually loading the reference FASTA so we can double check that sequences are generating good coverage
+        
+        # ## first loop for UniProt files
+        # try: 
+        #     reference_fasta_file = main_FASTA_directory + str(gene) + "_protein.fasta"
+
+        #     with open(reference_fasta_file) as handle:
+        #         for record in SeqIO.parse(handle, "fasta"):
+        #             gene_name, gene_variant = record.name.split("|")
+        #             if gene_name not in reference_fasta_seqs.keys():
+        #                 reference_fasta_seqs[gene_name] = {gene_variant : str(record.seq)}
+        #             elif gene_variant not in reference_fasta_seqs[gene_name].keys():
+        #                     reference_fasta_seqs[gene_name][gene_variant] = str(record.seq)
+        
+        # ## seperate loop for the supplemental / non-UniProt files
+        # except FileNotFoundError:
+        #     supplemental_files = glob.glob(supplemental_FASTA_directory + str(gene) + "_*_protein.fasta")
+        #     for reference_fasta_file in supplemental_files:
+        #         with open(reference_fasta_file) as handle:
+        #             for record in SeqIO.parse(handle, "fasta"):
+        #                 gene_name, gene_variant = record.name.split("_", 1)
+        #                 if gene_name not in reference_fasta_seqs.keys():
+        #                     reference_fasta_seqs[gene_name] = {gene_variant : str(record.seq)}
+        #                 elif gene_variant not in reference_fasta_seqs[gene_name].keys():
+        #                         reference_fasta_seqs[gene_name][gene_variant] = str(record.seq)
 
         candidate_hits = df_contig[df_contig.index == gene]
-        # print(candidate_hits)
-        ## need to filter the variants that aren't kept
-        # try:
-        # print(candidate_hits["variant"])
         filtered_candidates = candidate_hits[candidate_hits["variant"].isin(kept_variants)]
-
-        if len(filtered_candidates) > 1:
+        if len(filtered_candidates) > 0:
             max_p_id = max(filtered_candidates["p_id"])
-            max_flo_cov = max(filtered_candidates["flo_cov"])
-            print(filtered_candidates[(filtered_candidates["p_id"] == max_p_id) & (filtered_candidates["flo_cov"] == max_flo_cov)])
-            # print("Succesfully ID'd")
-            i =1
+            max_flo_cov = max(filtered_candidates["sub_cov"])
+            filtered_candidates = filtered_candidates[(filtered_candidates["p_id"] == max_p_id) & (filtered_candidates["sub_cov"] == max_flo_cov)]
+
+            ## handling case where there are multiple results with identical metrics AND reference sequences
+            ## assigns a label that is a combination of the variant IDs
+            if (len(filtered_candidates) > 1) & (len(filtered_candidates.reference_sequences.unique()) == 1):
+                output_id = gene +"|" + "+".join(filtered_candidates["variant"].sort_values().unique())
+
+            ## handling case where metrics are identical, but reference sequences differ
+            ## in this case, assigns label of match with longest reference
+            if len(filtered_candidates.reference_sequences.unique()) > 1:
+                filtered_candidates["ref_len"] = filtered_candidates.reference_sequences.map(len)
+                filtered_candidates = filtered_candidates[filtered_candidates["ref_len"] == max(filtered_candidates["ref_len"])]
+                output_id = gene + "|" + str(filtered_candidates["variant"].astype("string").item())
+                print(output_id) 
+
         # except KeyError:
             ## need to devise a system to handle cases where there are no variants that were kept
             ## Easiest answer is to just merge them into a conjoined label that is alphabetical
