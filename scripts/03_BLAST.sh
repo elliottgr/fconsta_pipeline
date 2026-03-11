@@ -25,7 +25,7 @@ show_help() {
 
 # Default values
 EVALUE=1e-5
-OUTFMT=8
+OUTFMT="10 qseqid sseqid pident length qlen slen mismatch gapopen gaps nident qstart qend sstart send evalue qcovs qcovhsp bitscore qseq sseq stitle" 
 QUERY_LIST="db/query_list.tsv"
 BLAST_DB=""
 BLAST_DB_REF=""
@@ -67,7 +67,8 @@ if [[ -z "$BLAST_DB" || -z "$BLAST_SEARCH" || -z "$QUERY_LIST" ]]; then
 fi
 
 # Create BLAST database if it does not exist
-if [[ ! -f "${BLAST_DB}.phr" ]]; then
+# FIX: Check for BOTH .phr (protein db) and .nhr (nucleotide db)
+if [[ ! -f "${BLAST_DB}.phr" && ! -f "${BLAST_DB}.nhr" ]]; then
     if [[ -z "$BLAST_DB_REF" || -z "$BLAST_DB_TYPE" || -z "$BLAST_DB_TITLE" ]]; then
         echo "Error: Missing required arguments to build BLAST database."
         show_help
@@ -102,7 +103,9 @@ echo $QUERY_FILES
 
 # If a custom outfmt is provided (i.e., not just a number), add the header line to the output file.
 if ! [[ "$OUTFMT" =~ ^[0-9]+$ ]]; then
-    echo -e "qseqid\tsseqid\tpident\tlength\tqlen\tmismatch\tgapopen\tgaps\tnident\tqstart\tqend\tsstart\tsend\tevalue\tqcovs\tqcovhsp\tbitscore" >> "$OUTPUT_DIR/$OUTPUT_FILE"
+    # echo -e "qseqid\tsseqid\tpident\tlength\tqlen\tmismatch\tgapopen\tgaps\tnident\tqstart\tqend\tsstart\tsend\tevalue\tqcovs\tqcovhsp\tbitscore" >> "$OUTPUT_DIR/$OUTPUT_FILE"
+    DYNAMIC_HEADER=$(echo "$OUTFMT" | sed 's/^[0-9]*[ ]*//' | tr ' ' '\t')
+    echo -e "$DYNAMIC_HEADER" >> "$OUTPUT_DIR/$OUTPUT_FILE"
 fi
 
 
@@ -112,9 +115,17 @@ for QUERY in "${QUERY_FILES[@]}"; do
     CLEAN_QUERY=$(mktemp)
     sed '/^>/ s/ /_/g' "$QUERY" > "$CLEAN_QUERY"
     
-    echo "Running $BLAST_SEARCH on cleaned query file..."
-    $BLAST_SEARCH -query "$CLEAN_QUERY" -db "$BLAST_DB" -evalue "$EVALUE" -outfmt "$OUTFMT" -qcov_hsp_perc "$QCOV_HSP_PERC" -num_threads "$NUM_THREADS" >> "$OUTPUT_DIR/$OUTPUT_FILE"
+    # echo "Running $BLAST_SEARCH on cleaned query file..."
+    # $BLAST_SEARCH -query "$CLEAN_QUERY" -db "$BLAST_DB" -evalue "$EVALUE" -outfmt "$OUTFMT" -qcov_hsp_perc "$QCOV_HSP_PERC" -num_threads "$NUM_THREADS" >> "$OUTPUT_DIR/$OUTPUT_FILE"
 
+    if [[ -n "$QCOV_HSP_PERC" ]]; then
+            echo "Running $BLAST_SEARCH with qcov_hsp_perc on cleaned query file..."
+                    $BLAST_SEARCH -query "$CLEAN_QUERY" -db "$BLAST_DB" -evalue "$EVALUE" -outfmt "$OUTFMT" -qcov_hsp_perc "$QCOV_HSP_PERC" -num_threads "$NUM_THREADS" >> "$OUTPUT_DIR/$OUTPUT_FILE"
+    else
+        echo "Running $BLAST_SEARCH on cleaned query file..."
+        $BLAST_SEARCH -query "$CLEAN_QUERY" -db "$BLAST_DB" -evalue "$EVALUE" -outfmt "$OUTFMT" -num_threads "$NUM_THREADS" >> "$OUTPUT_DIR/$OUTPUT_FILE"
+        fi
+    
     rm "$CLEAN_QUERY"
 done
 
