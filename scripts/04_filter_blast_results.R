@@ -89,11 +89,10 @@ process_blast_hits <- function(
   df_filtered <- read_tsv(input, show_col_types = FALSE) %>%
     dplyr::mutate(
       qid = str_extract(qseqid, "^[^|]+"),
-      gene_original = case_when(collapse_variants = FALSE ~ sseqid, collapse_variants = TRUE ~ str_extract(sseqid, "^[^|]+") %>% str_remove_all("[^[:alnum:]]+")),
-      #gene_original = str_extract(sseqid, "^[^|]+") %>% str_remove_all("[^[:alnum:]]+"),
+      gene_original = case_when(collapse_variants == TRUE ~ str_extract(sseqid, "^[^|]+") %>% str_remove_all("[^[:alnum:]]+"),
+                                collapse_variants == FALSE ~ sseqid),
       gene_lower = tolower(gene_original),
-      #gene_original = sseqid,
-      #gene_lower = tolower(sseqid),
+
       
       # 1. Simple Coverage: Coverage of this single specific alignment (HSP)
       simple_subject_coverage = ((abs(send - sstart) + 1) / slen) * 100
