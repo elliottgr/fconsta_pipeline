@@ -7,12 +7,12 @@ from PythonHelperFuncs import create_LV_dist_df
 
 
 ## TO DO: turn these into cmd line args
-blast_output_file = "outputs/blast_outputs.tsv"
+blast_output_file = "outputs/test.tsv"
 annotation_file = "extra/gene_annotations.csv"
 main_FASTA_directory = "downloaded_data/UNIPROT_gene_data/protein_sequences/" ## needed for data validation
 supplemental_FASTA_directory = "extra/sequences/"
 min_pident, min_qcov, verbose = (90, 85, True)
-outgroup_identity_threshold = 99 ## bit of a convuluted stat, but we want to join any category that has too much similarity with the outgroup
+outgroup_identity_threshold = 98 ## bit of a convuluted stat, but we want to join any category that has too much similarity with the outgroup
 
 ## Importing the BLAST files
 df = create_df_from_blast(blast_output_file, annotation_file, min_pident, min_qcov, verbose)
@@ -68,7 +68,7 @@ for contig in df["contig"].unique():
             ## handling case where there are multiple results with identical metrics AND reference sequences
             ## assigns a label that is a combination of the variant IDs
             for name, candidate in filtered_candidates.iterrows():
-                output_gene_label = gene +"|" + candidate["variant"]
+                output_gene_label = gene + "|" + candidate["variant"]
                     # else: ## Some sequences seem to break this somehow. As an arbitrary work around, I'm simply declaring it ambiguous
                     #     output_gene_label = gene + "|ambiguous"
                 # else:
@@ -80,6 +80,7 @@ for contig in df["contig"].unique():
                     output_dict[strainID] = {output_gene_label : 1}
                 else:
                     output_dict[strainID][output_gene_label] += 1
+                    
 output_df = pd.DataFrame.from_dict(output_dict).transpose().fillna(0).astype(int)
 print("Done! Saving to outputs/Python_PA_table.csv :)")
 output_df.to_csv("outputs/Python_PA_table.csv")
