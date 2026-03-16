@@ -1,0 +1,25 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+extra/sequences/
+downloaded_data/
+db/gene_names_debug.tsv
+extra/MinimalExample.py
+extra/distance_matrices/
+extra/downloads/
+extra/gene_annotations.csv
+extra/queries.csv
+extra/queries.txt
+extra/sequences.fasta
+extra/sequences/
+fconsta_pipeline.Rproj
+outputs/
+blast/
+db/blp_and_others_bacteriocin_and_comABCDEFX_gene_collection copy.faa
+db/blp_and_others_bacteriocin_and_comABCDEFX_gene_collection.faa
+db/protein_sequences.fasta
+extra/__pycache__/
+scripts/__init__.py
+scripts/__pycache__/
+
