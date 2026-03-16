@@ -19,7 +19,7 @@ def load_gene_var_fasta(gene_var):
 PA_table_file = "outputs/PA_table_with_variants.csv"
 annotation_file = "extra/gene_annotations.csv"
 target_cluster = "blp" ## only want genes from this group
-seq_similarity_threshold = 98 ## maximum percent identity for variants before we merge them
+seq_similarity_threshold = .90 ## maximum percent identity for variants before we merge them
 
 
 df = pd.read_csv(PA_table_file, index_col = "GCA_ID")
@@ -58,11 +58,49 @@ for var in gene_var_dict.keys():
 
 
 ## filters variants that are too similar, groups them together
-for gene_var in variants_to_keep:
-    gene, var = gene_var.split("|")
-    handle = load_gene_var_fasta(gene_var)
+variants_to_merge = {}
+for gene_var_focal in variants_to_keep:
+    
+    gene_foc, var_foc = gene_var_focal.split("|")
+    handle_foc = load_gene_var_fasta(gene_var_focal)
+    records_foc = SeqIO.parse(handle_foc, "fasta")
 
+    for record_foc in records_foc:
+        # print(str(record_foc.id).strip().lower())
+        # print(gene_var_focal.strip().lower(), "\n")
+        if str(record_foc.id).strip().lower() == gene_var_focal.strip().lower():
+
+            for gene_var_compare in variants_to_keep:
+                gene_comp, var_comp = gene_var_compare.split("|")
+
+                if gene_foc == gene_comp:
+
+                    if var_foc != var_comp:
+
+                        handle_comp = load_gene_var_fasta(gene_var_compare)
+                        records_comp = SeqIO.parse(handle_comp, "fasta")
+                        
+                        for record_comp in records_comp:
+                            # print(record_comp.description)
+                            if str(record_comp.id).strip().lower() == gene_var_compare.strip().lower():
+
+                                if lv.ratio(record_foc.seq, record_comp.seq) > seq_similarity_threshold:
+                                    if gene_foc in variants_to_merge.keys():
+                                        variants_to_merge[gene_comp].append(var_foc)
+                                        variants_to_merge[gene_comp].append(var_comp)
+                                    else:
+                                        variants_to_merge[gene_comp] = [var_foc, var_comp]
+variants_to_discard = []
+
+print(variants_to_merge.keys())
+for gene in variants_to_merge.keys():
+    new_column_id = gene + "|" + "+".join(set(variants_to_merge[gene]))
+    for x in set(variants_to_merge[gene]):
+        variants_to_keep.remove(gene+"|"+x)
+    df[new_column_id] = df[list([gene+"|"+x for x in set(variants_to_merge[gene])])].sum(axis=1).clip(0, 1)
+    variants_to_keep.append(new_column_id)
 
 df = df[sorted(list(set(variants_to_keep)))]
-print(df.head())
-df.to_csv("outputs/" + target_cluster + "_PA_table_with_filtered_variants.csv")
+print(df.columns)
+df = df.reset_index(names="GCA_ID")
+df.to_csv("outputs/" + target_cluster + "_PA_table_with_filtered_variants_threshold_" +str(seq_similarity_threshold) +".csv")

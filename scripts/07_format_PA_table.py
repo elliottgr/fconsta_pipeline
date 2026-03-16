@@ -10,7 +10,7 @@ from Bio import Entrez
 import os, sys ## for files and args :D
 
 ## Entrez stuff
-Entrez.email = "add_an_email@example.url"
+Entrez.email = "elliott.greene@unil.ch"
 Entrez.tool = "MightBeNiceToNameThis"
 
 ## loading the table
