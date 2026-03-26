@@ -10,6 +10,16 @@ df = read.csv("outputs/labeled_pa_table.csv")# %>% gsub("-", "_", Strain)#%>% re
 df_filtered <- Filter(function(x)(length(unique(x))>1), df)
 tree = read.newick(file = "extra/supplemental_data/Croucher.nwk") ## if you're running this yourself, you'll need to supply your own newick format tree.
 
+#IsolatesAndStrains<-unique(c(df$Isolate,df$Strain))
+
+tree<-keep.tip(tree, as.character(df$Isolate))
+
+#mapply(setdiff, tree$tip.label, df$Isolate)
+
+## some R packages play poorly with - instead of _
+tree$tip.label <- gsub("-","_", tree$tip.label)
+df$Isolate <- gsub("-","_",df$Isolate)
+
 ## insane behavior please delete this language remove R 
 good_columns = colnames(df_filtered)
 ## removing first few dummy columns
