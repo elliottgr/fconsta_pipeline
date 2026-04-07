@@ -2,36 +2,29 @@
 ## In brief, this determines how much of the binary character data is distributed by phylogenetic
 ## signal. Significant phylo signal would suggest gene variants are being distributed vertically
 
-
+library(tidyverse)
 library("caper")
 library("phytools") ## the goat, need it to load phylo tree
+
 ## need to load filtered presence absence data (output of scripts/07_format_PA_table.py)
 df = read.csv("outputs/labeled_pa_table.csv")# %>% gsub("-", "_", Strain)#%>% rename(names = Strain)
-df_filtered <- Filter(function(x)(length(unique(x))>1), df)
+df_filtered <- Filter(function(x)(length(unique(x))>1), df) %>% select(!c("X", "Strain", "GCA_ID"))
 tree = read.newick(file = "extra/supplemental_data/Croucher.nwk") ## if you're running this yourself, you'll need to supply your own newick format tree.
 
-#IsolatesAndStrains<-unique(c(df$Isolate,df$Strain))
 
-tree<-keep.tip(tree, as.character(df$Isolate))
 
-#mapply(setdiff, tree$tip.label, df$Isolate)
 
-## some R packages play poorly with - instead of _
-tree$tip.label <- gsub("-","_", tree$tip.label)
-df$Isolate <- gsub("-","_",df$Isolate)
 
-## insane behavior please delete this language remove R 
+## insane behavior 
 good_columns = colnames(df_filtered)
-## removing first few dummy columns
+## removing first dummy column
 good_columns = good_columns[-1]
-good_columns = good_columns[-1]
-good_columns = good_columns[-1]
-good_columns = good_columns[-1]
+
 l<-c()
 i<-1
 while (i < length(good_columns)){
 for (col in good_columns) {
-  l[[i]] <- paste("phylo.d(df_filtered, tree, Strain, binvar=", col , ")", sep = "")
+  l[[i]] <- paste("phylo.d(df_filtered, tree, Isolate, binvar=", col , ")", sep = "")
   i<- i+1
 }
 }
@@ -44,16 +37,19 @@ est_d<-c()
 num_genes<-1
 while (num_genes<length(l)){
 for (element in l){
-  tryCatch({output = str_eval(element)}, error = function(msg){print("error with gene!")})
+  tryCatch({output = str_eval(element)
   print(output)
   gene_names[num_genes]<-output$binvar
   est_d[num_genes]<-output$DEstimate
   p_no_structure[num_genes]<-output$Pval1
   p_brownian[num_genes]<-output$Pval0
+
+  }, error = function(msg){warning(msg)
+    print("error with gene!")})
   num_genes<-num_genes+1
 }
 }
 
 output_list<- list(gene_names, p_no_structure, p_brownian, est_d)
 output<- as.data.frame(do.call(cbind, output_list)) %>% rename(gene_variant = V1, p_no_structure = V2, p_brownian_structure = V3, estimated_d = V4)
-write.csv(output, file="d_value_estimates.csv")
+write.csv(output, file="d_value_estimates_26_03_26.csv")

@@ -154,7 +154,7 @@ Data generated during the pipeline is not stored with metadata. For later analys
 You can use it via 
 
 ```python
-python3 scripts/06_format_PA_table.py path_to/your_pa_table.csv
+python3 scripts/07_format_PA_table.py path_to/your_pa_table.csv
 ```
 
 ### Supplemental stuff
