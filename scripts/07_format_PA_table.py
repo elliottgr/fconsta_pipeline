@@ -31,7 +31,7 @@ Strain_Vec = [] ## not necessary explicitly, but nice for later data validation
 for i in range(len(df_pa)):
     test_gca = df_pa.GCA_ID.iloc[i]
 
-    print("Checking metadata for assembly " + str(test_gca))
+    print("Checking metadata for assembly " + str(test_gca) + "  " + str(i) + "/" + str(len(df_pa)))
     stream = Entrez.esearch(db='assembly', term = test_gca, retmax="40")
     record1 = Entrez.read(stream)
     try:
