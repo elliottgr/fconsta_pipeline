@@ -17,13 +17,13 @@ def load_gene_var_fasta(gene_var):
         handle = open("extra/sequences/" + gene +"_" + variant + "_protein.fasta")
     return handle
 
-PA_table_file = "outputs/PA_table_with_variants.csv"
+PA_table_file = "outputs/BacteriocinLoci85pid_pa_table_2026-May-11.csv"
 annotation_file = "extra/gene_annotations.csv"
 target_cluster = "blp" ## only want genes from this group
 seq_similarity_threshold = .00 ## maximum percent identity for variants before we merge them
 
 
-df = pd.read_csv(PA_table_file, index_col = "GCA_ID")
+df = pd.read_csv(PA_table_file, index_col = "GCA_ID").drop(columns=["Unnamed: 0"])
 an_df = pd.read_csv(annotation_file)
 an_df["gene_lower"] = an_df["gene"].str.lower()
 an_df = an_df.dropna(subset="cluster")

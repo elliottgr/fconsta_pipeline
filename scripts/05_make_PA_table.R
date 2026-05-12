@@ -17,7 +17,7 @@ if (length(args)==0){
 
 
 source("scripts/04_filter_blast_results.R")
-results<-process_blast_hits(input="outputs/blast_out.tsv", min_pident = 70, min_qcovs = 50, annotation_file = NULL)
+results<-process_blast_hits(input="outputs/blast_outputs.tsv", min_pident = 85, min_scov = 75, annotation_file = NULL)
 print("Saving tables!")
 write.csv(results$df_filtered, filename_filtered)
 write.csv(results$df_ranked, filename_ranked)

@@ -5,8 +5,9 @@
 import pandas as pd
 
 filename = "outputs/blast_outputs.tsv"
-old_PA_table = "outputs/DataForCurnagl/labeled_pa_table_binned_genes.csv"
+old_PA_table = "outputs/labeled_pa_table.csv"
 df = pd.read_csv(filename, sep="\t")
+
 
 non_functionals = []
 functionals = []
@@ -18,7 +19,8 @@ for idx, row in df.iterrows():
         elif "GLLSFLPL" in row.qseq:
             functionals.append(row.qseqid.split("|")[0])
 
-PA = pd.read_csv(old_PA_table, sep="\t")
+PA = pd.read_csv(old_PA_table, sep=",")
+print(PA.head())
 blpA_func = []
 blpA_non_func = []
 
@@ -40,5 +42,5 @@ df_pastml = new_PA.copy()
 df_pastml = df_pastml.rename(columns={"Isolate" : "ID"})
 df_pastml = df_pastml.drop(columns=["Strain", "GCA_ID", "Unnamed: 0"])
 df_pastml = df_pastml.set_index("ID")
-df_pastml.to_csv("outputs/DataForCurnagl/labeled_pa_table_binned_genes_blpA_cleaned.csv")
+df_pastml.to_csv("outputs/DataForCurnagl/labeled_pa_table_85pid_blpA_cleaned.csv", sep = "\t")
 print(new_PA.head())
