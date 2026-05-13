@@ -12,6 +12,7 @@ df = pd.read_csv(filename, sep="\t")
 non_functionals = []
 functionals = []
 
+## iterating over the contigs and searching for the BP insertion
 for idx, row in df.iterrows():
     if "blpA" in row.stitle:
         if "GLLSKLP" in row.qseq:
@@ -38,6 +39,13 @@ for idx, row in PA.iterrows():
 new_PA = PA.copy()
 new_PA.insert(4, "blpA_non_functional", blpA_non_func)
 new_PA.insert(5, "blpA_functional", blpA_func)
+
+## dropping old blpA columns
+for col in PA.columns:
+    print(col)
+    if "|" in col:
+        new_PA.drop(columns = col, inplace = True)
+new_PA.to_csv("outputs/labeled_pa_table_blpA_merged.csv")
 df_pastml = new_PA.copy()
 df_pastml = df_pastml.rename(columns={"Isolate" : "ID"})
 df_pastml = df_pastml.drop(columns=["Strain", "GCA_ID", "Unnamed: 0"])
