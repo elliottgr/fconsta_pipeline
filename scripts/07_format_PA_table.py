@@ -27,6 +27,7 @@ df_pa = pd.read_csv(pa_table, index_col="Unnamed: 0")
 Isolate_Vec = [] ## what we actually need
 Strain_Vec = [] ## not necessary explicitly, but nice for later data validation
 
+unknown_IDs = 0
 
 for i in range(len(df_pa)):
     test_gca = df_pa.GCA_ID.iloc[i]
@@ -48,6 +49,12 @@ for i in range(len(df_pa)):
     except IndexError:
         print("Seems like we didn't find a result for that sequence lookup :(")
         print(test_gca)
+
+        ## adding a simple fallback to make sure the table still generates
+        Isolate = "UnknownIsolate"+"{0:04}".format(unknown_IDs)
+        Isolate_Vec.append(Isolate)
+        Strain_Vec.append(Isolate)
+        unknown_IDs+=1
     
 
 
