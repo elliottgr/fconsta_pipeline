@@ -51,7 +51,7 @@ for i in range(len(df_pa)):
         print(test_gca)
 
         ## adding a simple fallback to make sure the table still generates
-        Isolate = "UnknownIsolate"+"{0:04}".format(unknown_IDs)
+        Isolate = "UnknownIsolate"+"{0:04}".format(unknown_IDs) + "_" + test_gca
         Isolate_Vec.append(Isolate)
         Strain_Vec.append(Isolate)
         unknown_IDs+=1
