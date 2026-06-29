@@ -6,6 +6,8 @@
 import pandas as pd
 from Bio import SeqIO
 import Levenshtein as lv
+import sys
+
 
 def load_gene_var_fasta(gene_var):
     gene, variant = gene_var.split("|", 1)
@@ -17,8 +19,10 @@ def load_gene_var_fasta(gene_var):
         handle = open("extra/sequences/" + gene +"_" + variant + "_protein.fasta")
     return handle
 
-PA_table_file = "outputs/BacteriocinLoci_pa_table_2026-Jun-24.csv"
-annotation_file = "extra/gene_annotations.csv"
+# PA_table_file = "outputs/BacteriocinLoci_pa_table_2026-Jun-24.csv"
+# annotation_file = "extra/gene_annotations.csv"
+PA_table_file = sys.argv[1]
+annotation_file = sys.argv[2]
 target_cluster = "blp" ## only want genes from this group
 seq_similarity_threshold = .00 ## maximum percent identity for variants before we merge them
 

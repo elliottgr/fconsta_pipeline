@@ -32,7 +32,7 @@ unknown_IDs = 0
 for i in range(len(df_pa)):
     test_gca = df_pa.GCA_ID.iloc[i]
 
-    print("Checking metadata for assembly " + str(test_gca) + "  " + str(i) + "/" + str(len(df_pa)))
+    print("Checking metadata for assembly " + str(test_gca) + "  " + str(i+1) + "/" + str(len(df_pa)))
     stream = Entrez.esearch(db='assembly', term = test_gca, retmax="40")
     record1 = Entrez.read(stream)
     try:

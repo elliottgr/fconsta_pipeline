@@ -1,0 +1,34 @@
+## From Gladstone et al's project
+
+bash -l scripts/01_download_NCBI_genomes.sh \
+    --NCBI_accession PRJEB2417 \
+    --include genome,gff3,gbff,protein \
+    --output Gladstone_WGS_data \
+    --include_file_name_in_header \
+    --clean
+
+## we already have the reference sequences, just need to run the blast step
+bash scripts/03_BLAST.sh \
+    --blast_db downloaded_data/blast/bacteriocin_BLAST \
+    --blast_db_reference_sequences downloaded_data/UNIPROT_gene_data/protein_sequences/protein_sequences.fasta \
+    --blast_db_type prot \
+    --blast_db_title 'bacteriocin_BLAST_db' \
+    --query_list db/query_list.tsv \
+    --blast_search blastx \
+    --evalue 1e-3 \
+    --outfmt "6 qseqid sseqid pident length qlen slen mismatch gapopen gaps nident qstart qend sstart send evalue qcovs qcovhsp bitscore stitle qseq sseq" \
+    --num_threads 6 \
+    --qcov_hsp_perc 0 \
+    --output_file blast_outputs.tsv
+
+## generating a PA table
+Rscript scripts/05_make_PA_table.R BacteriocinLoci
+
+## binning gene variants
+python3 scripts/99_custom_filter_table.py outputs/BacteriocinLoci_pa_table_2026-Jun-29.csv extra/gene_annotations.csv
+
+## formatting the table with strain IDs
+python3 scripts/07_format_PA_table.py outputs/blp_PA_table_with_binned_variants_no_threshold.csv
+
+## filtering blpA variants
+python3 extra/FilterblpAvar.py outputs/blast_outputs.tsv outputs/labeled_pa_table.csv
