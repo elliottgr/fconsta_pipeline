@@ -17,6 +17,7 @@ fi
 # Default values for optional flags
 CLEAN=false
 INCLUDE_FILE_NAME_IN_HEADER=false
+DEEPCLEAN=false
 
 # Parse command-line arguments
 while [[ $# -gt 0 ]]; do
@@ -35,6 +36,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --clean)
             CLEAN=true
+            shift
+            ;;
+        --deep_clean)
+            DEEPCLEAN=true
             shift
             ;;
         --include_file_name_in_header)
@@ -162,6 +167,11 @@ safe_base_dir=$(tr -cd '[:alnum:]-_.' <<< "$base_dir" | cut -c 1-50)
                 
                 cp "$file" "$dest" || exit 1
                 
+                if $DEEPCLEAN; then
+                    $FINAL_DATA_DIR/$fname >> db/running_query_list.tsv
+                    rm -rf "$file"
+                fi
+
                 # Modify FASTA headers if requested
                 if $INCLUDE_FILE_NAME_IN_HEADER; then
                     case "$ext" in
@@ -191,7 +201,10 @@ fi
 #conda deactivate
 echo "Success! Output files in: $FINAL_DATA_DIR"
 echo "Saving list of genomes to query to: /db/query_list.txt"
-ls $OUTPUT_DIR/data/*.fna > db/query_list.tsv
+
+if ! $DEEPCLEAN; then
+    ls $OUTPUT_DIR/data/*.fna > db/query_list.tsv
+fi
 
 if $condamode; then
     conda deactivate
