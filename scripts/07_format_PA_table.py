@@ -9,21 +9,28 @@ import pandas as pd
 from Bio import Entrez
 import os, sys ## for files and args :D
 
-## Entrez stuff
-Entrez.email = "elliott.greene@unil.ch"
-Entrez.tool = "MightBeNiceToNameThis"
+
 
 ## loading the table
 if len(sys.argv) > 1:
     pa_table = sys.argv[1]
-if len(sys.argv) > 2:
-    api_key = sys.argv[2]
-    print("Using NCBI API key: ", api_key)
+    print("Loading table ", pa_table)
+    if len(sys.argv) > 2:
+        api_key = sys.argv[2].strip()
+        print("Using NCBI API key: ", api_key)
+        Entrez.api_key = api_key
+    else:
+        print("No NCBI API key given, running more slowlz but it should still work!")
 
 ## cancels the run if you forgot a file 
 else: 
     print("\n You need to give me a file to process. Please rerun the script with a command line argument like: \n\n python3 scripts/06_format_PA_table.py path_to/your_pa_file.csv \n\n")
     sys.exit()
+
+## Entrez stuff
+Entrez.email = "elliott.greene@unil.ch"
+Entrez.tool = "MightBeNiceToNameThis"
+
 
 df_pa = pd.read_csv(pa_table, index_col="Unnamed: 0")
 print("Succesfully loaded gene table\n")
@@ -36,7 +43,7 @@ for i in range(len(df_pa)):
     test_gca = df_pa.GCA_ID.iloc[i]
 
     print("Checking metadata for assembly " + str(test_gca) + "  " + str(i+1) + "/" + str(len(df_pa)))
-    stream = Entrez.esearch(db='assembly', term = test_gca, retmax="40" , api_key = api_key)
+    stream = Entrez.esearch(db='assembly', term = test_gca, retmax="40")
     record1 = Entrez.read(stream)
     try:
         stream = Entrez.esummary(db='assembly', id = record1['IdList'][0])
