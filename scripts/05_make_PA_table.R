@@ -17,7 +17,12 @@ if (length(args)==0){
 
 
 source("scripts/04_filter_blast_results.R")
-results<-process_blast_hits(input="outputs/blast_outputs.tsv", min_pident = 85, min_scov = 75, annotation_file = NULL)
+if (length(args)==0){
+    results<-process_blast_hits(input="outputs/blast_outputs.tsv", min_pident = 85, min_scov = 75, annotation_file = NULL)
+} else if (length(args)>=1) {
+    results<-process_blast_hits(input=paste(args[2]".tsv"), min_pident = 85, min_scov = 75, annotation_file = NULL)
+}
+
 print("Saving tables!")
 write.csv(results$df_filtered, filename_filtered)
 write.csv(results$df_ranked, filename_ranked)

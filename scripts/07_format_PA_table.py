@@ -16,6 +16,7 @@ Entrez.tool = "MightBeNiceToNameThis"
 ## loading the table
 if len(sys.argv) > 1:
     pa_table = sys.argv[1]
+    api_key = sys.argv[2]
 
 ## cancels the run if you forgot a file 
 else: 
@@ -33,7 +34,7 @@ for i in range(len(df_pa)):
     test_gca = df_pa.GCA_ID.iloc[i]
 
     print("Checking metadata for assembly " + str(test_gca) + "  " + str(i+1) + "/" + str(len(df_pa)))
-    stream = Entrez.esearch(db='assembly', term = test_gca, retmax="40")
+    stream = Entrez.esearch(db='assembly', term = test_gca, retmax="40", api_key = api_key)
     record1 = Entrez.read(stream)
     try:
         stream = Entrez.esummary(db='assembly', id = record1['IdList'][0])
