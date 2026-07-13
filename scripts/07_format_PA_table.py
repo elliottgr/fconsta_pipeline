@@ -16,7 +16,9 @@ Entrez.tool = "MightBeNiceToNameThis"
 ## loading the table
 if len(sys.argv) > 1:
     pa_table = sys.argv[1]
+if len(sys.argv) > 2:
     api_key = sys.argv[2]
+    print("Using NCBI API key: ", api_key)
 
 ## cancels the run if you forgot a file 
 else: 
@@ -24,7 +26,7 @@ else:
     sys.exit()
 
 df_pa = pd.read_csv(pa_table, index_col="Unnamed: 0")
-
+print("Succesfully loaded gene table\n")
 Isolate_Vec = [] ## what we actually need
 Strain_Vec = [] ## not necessary explicitly, but nice for later data validation
 
@@ -34,7 +36,7 @@ for i in range(len(df_pa)):
     test_gca = df_pa.GCA_ID.iloc[i]
 
     print("Checking metadata for assembly " + str(test_gca) + "  " + str(i+1) + "/" + str(len(df_pa)))
-    stream = Entrez.esearch(db='assembly', term = test_gca, retmax="40", api_key = api_key)
+    stream = Entrez.esearch(db='assembly', term = test_gca, retmax="40" , api_key = api_key)
     record1 = Entrez.read(stream)
     try:
         stream = Entrez.esummary(db='assembly', id = record1['IdList'][0])

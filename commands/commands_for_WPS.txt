@@ -27,3 +27,5 @@ bash scripts/03_BLAST.sh \
     --num_threads 6 \
     --qcov_hsp_perc 0 \
     --output_file blast_outputs.tsv
+
+caffeinate -d python3 scripts/07_format_PA_table.py outputs/blp_PA_table_with_binned_variants_no_threshold.csv e352dcbec59ccf13ed30a7225e02313e760
