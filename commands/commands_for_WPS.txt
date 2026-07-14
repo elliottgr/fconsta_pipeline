@@ -15,6 +15,9 @@ bash -l scripts/01_5_test.sh \
     --clean
 
 ## we already have the reference sequences, just need to run the blast step
+## Since the GPS data is massive, we need to break it down into multiple jobs.
+## I did this by running this command until it hit a memory limit on our cluster, and then
+## I would clear the files that had not been BLASTED from the downloads folder
 bash scripts/03_BLAST.sh \
     --blast_db downloaded_data/blast/bacteriocin_BLAST \
     --blast_db_reference_sequences downloaded_data/UNIPROT_gene_data/protein_sequences/protein_sequences.fasta \
@@ -28,4 +31,18 @@ bash scripts/03_BLAST.sh \
     --qcov_hsp_perc 0 \
     --output_file blast_outputs.tsv
 
-caffeinate -d python3 scripts/07_format_PA_table.py outputs/blp_PA_table_with_binned_variants_no_threshold.csv e352dcbec59ccf13ed30a7225e02313e760
+
+## generating a PA table was difficult with the disparate files
+## Intermediate BLAST outputs were labeled inter_blast_outputs_XX and
+## passed to script 5 using a shell script
+Sbatch ScriptsForGPS/runPipeline2.sh
+
+## Since I bungled the original run, a seperate larger file was initially created containing a lot of the blast outputs, it was processed using
+Sbatch ScriptsForGPS/runPipelineBigFile.sh
+
+## Binning the variants was easy, the normal script handled inter_blast_outputs_XX## binning gene variants
+python3 scripts/99_custom_filter_table.py outputs/BacteriocinLoci_pa_table_2026-Jul-02.csv extra/gene_annotations.csv
+
+
+## Script 7 was not able to run on the cluster due to NCBI weirdness. I ran it locally using caffeinate to prevent my macbook from sleeping
+caffeinate -d python3 scripts/07_format_PA_table.py outputs/blp_PA_table_with_binned_variants_no_threshold.csv
