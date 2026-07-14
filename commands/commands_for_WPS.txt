@@ -43,6 +43,10 @@ Sbatch ScriptsForGPS/runPipelineBigFile.sh
 ## Binning the variants was easy, the normal script handled inter_blast_outputs_XX## binning gene variants
 python3 scripts/99_custom_filter_table.py outputs/BacteriocinLoci_pa_table_2026-Jul-02.csv extra/gene_annotations.csv
 
-
 ## Script 7 was not able to run on the cluster due to NCBI weirdness. I ran it locally using caffeinate to prevent my macbook from sleeping
 caffeinate -d python3 scripts/07_format_PA_table.py outputs/blp_PA_table_with_binned_variants_no_threshold.csv
+
+## Detecting blpA variant functionality is tricky, since the default script won't be able to load all the blast results into a single table
+## We create a seperate table capable of respecting cluster RAM limits :)
+## Strictly, this may not be necessary since its possible that the blpA variants we want to search for are contained in a single BLAST file. For completeness, however, it seems prudential to iterate over every file since this is relativelz inexpensive computationally
+Sbatch runBlpAfilter.sh
