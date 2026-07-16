@@ -50,3 +50,5 @@ caffeinate -d python3 scripts/07_format_PA_table.py outputs/blp_PA_table_with_bi
 ## We create a seperate table capable of respecting cluster RAM limits :)
 ## Strictly, this may not be necessary since its possible that the blpA variants we want to search for are contained in a single BLAST file. For completeness, however, it seems prudential to iterate over every file since this is relativelz inexpensive computationally
 Sbatch runBlpAfilter.sh
+
+## We need to attach metadata to the final PA table
