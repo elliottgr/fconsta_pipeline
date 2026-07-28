@@ -5,14 +5,13 @@ df = pd.read_csv("outputs_from_GPS/PA_with_metadata.csv")
 ann = pd.read_csv("extra/gene_annotations.csv")
 
 
-
 ## Manually adding a row for blpA func and non func
 ann.loc[-1] = pd.Series({"gene" : "blpA_functional", "genbank_accession" : "na", "functions" : "Transporter", "cluster" : "blp"})
 ann.loc[-2] = pd.Series({"gene" : "blpA_non_functional", "genbank_accession" : "na", "functions" : "Transporter", "cluster" : "blp"})
 
 ## creating new columns for number of genes in each annotation category
 
-threshold = .3 ## minimum proportion of contigs returning the gene before it is present
+threshold = .1 ## minimum proportion of contigs returning the gene before it is present
 gdf = df.groupby("GCA_ID")
 annotations = {}
 
@@ -52,5 +51,6 @@ for gene in ann.gene:
 
 for annotation in annotations.keys():
     df[annotation] = df.GCA_ID.map(annotations[annotation])
+print(len(df))
 
 df.to_csv("outputs_from_GPS/PA_table_with_annotation_counts.csv")
